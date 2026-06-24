@@ -339,6 +339,14 @@ textarea.form-input{resize:none}
 .lang-btn{background:none;border:1.5px solid rgba(184,150,106,.35);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .lang-btn:hover{background:rgba(184,150,106,.12)}
 .auth-lang{position:absolute;top:18px;right:18px}
+/* ACCORDION */
+.acc-section{border-bottom:1px solid var(--goldlt);margin-bottom:0}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;user-select:none}
+.acc-title{font-size:13px;font-weight:700;color:var(--ink1);letter-spacing:.02em}
+.acc-arrow{font-size:14px;color:var(--gold);transition:transform .25s;display:inline-block}
+.acc-arrow.open{transform:rotate(180deg)}
+.acc-body{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1);padding:0 18px}
+.acc-body.open{max-height:1000px;padding:0 18px 14px}
 /* UTILS */
 .toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:20px;font-size:12.5px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
@@ -546,7 +554,7 @@ window._f={createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,upd
 onAuthStateChanged(auth,async user=>{
   if(user){
     window._user=user;
-    window._isAdmin=(user.email==='gabriela.neshovska@gmail.com'||user.email==='neshovska@yahoo.com'||user.email.includes('satorilaser'));
+    window._isAdmin=(user.email==='neshovska@yahoo.com');
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('app').classList.add('show');
     document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
@@ -1181,20 +1189,28 @@ async function openSheet(id){
   }
   const mk=(arr,cls)=>(arr||[]).map(([em,txt])=>`<div class="care-item ${cls}"><span class="care-em">${em}</span><span class="care-txt">${txt}</span></div>`).join('');
   const notPrefix = window._lang==='en' ? 'NO' : 'НЕ';
+  const acc = (title, body, open=false) => `
+    <div class="acc-section">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-title">${title}</span>
+        <span class="acc-arrow ${open?'open':''}">⌄</span>
+      </div>
+      <div class="acc-body ${open?'open':''}">${body}</div>
+    </div>`;
   document.getElementById('sh-body').innerHTML=`
-    <div class="info-section"><div class="info-title">${t('whatIs')}</div><div class="info-card"><div class="info-text">${lp.what}</div></div></div>
-    ${lp.devices?.length?`<div class="info-section"><div class="info-title">${t('devices')}</div><div class="device-tags">${lp.devices.map(d=>`<span class="device-tag">${d}</span>`).join('')}</div></div>`:''}
-    ${lp.zones?`<div class="info-section"><div class="info-title">${t('zones')}</div><div class="info-card"><div class="info-text">${lp.zones}</div></div></div>`:''}
-    ${lp.results?.length?`<div class="info-section"><div class="info-title">${t('results')}</div><div class="info-card">${lp.results.map(r=>`<div class="result-row"><div class="result-dot"></div><div class="result-txt">${r}</div></div>`).join('')}<div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--goldlt);font-size:10.5px;color:var(--sage)">⏱️ ${lp.interval||''} · 💊 ${lp.sessions||''}</div></div></div>`:''}
-    ${lp.contra?.length?`<div class="info-section"><div class="info-title">${t('contra')}</div><div class="info-card">${lp.contra.map(c=>`<div class="contra-item"><div class="contra-dot"></div><div>${c}</div></div>`).join('')}</div></div>`:''}
-    ${lp.before?.length?`<div class="info-section"><div class="info-title">${t('before')}</div><div class="care-list">${mk(lp.before,'warn')}</div></div>`:''}
-    ${lp.after?.length?`<div class="info-section"><div class="info-title">${t('after')}</div><div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div></div>`:''}
+    ${acc(t('whatIs'), `<div class="info-card" style="margin-top:0;border-radius:12px"><div class="info-text">${lp.what}</div></div>`, true)}
+    ${lp.devices?.length?acc(t('devices'), `<div class="device-tags">${lp.devices.map(d=>`<span class="device-tag">${d}</span>`).join('')}</div>`):''}
+    ${lp.zones?acc(t('zones'), `<div class="info-card" style="margin-top:0;border-radius:12px"><div class="info-text">${lp.zones}</div></div>`):''}
+    ${lp.results?.length?acc(t('results'), `<div class="info-card" style="margin-top:0;border-radius:12px">${lp.results.map(r=>`<div class="result-row"><div class="result-dot"></div><div class="result-txt">${r}</div></div>`).join('')}<div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--goldlt);font-size:10.5px;color:var(--sage)">⏱️ ${lp.interval||''} · 💊 ${lp.sessions||''}</div></div>`):''}
+    ${lp.contra?.length?acc(t('contra'), `<div class="info-card" style="margin-top:0;border-radius:12px">${lp.contra.map(c=>`<div class="contra-item"><div class="contra-dot"></div><div>${c}</div></div>`).join('')}</div>`):''}
+    ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
+    ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
     ${clinicAdsHTML}${productAdsHTML}
     <div class="ai-chat-section">
-      <button class="ai-chat-btn" onclick="openAiChat('${id}','${lp.name}')">
-        <span style="font-size:16px">✦</span>
+      <button class="ai-chat-btn" onclick="showPremiumMsg()" style="opacity:.75">
+        <span style="font-size:15px">✦</span>
         <span>${t('aiChatBtn')}</span>
-        <span style="font-size:12px;opacity:.6">›</span>
+        <span style="font-size:10px;background:linear-gradient(135deg,#b8966a,#d4a96a);color:#fff;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.05em">PREMIUM</span>
       </button>
     </div>
     ${window._user?`<div class="diary-section">
@@ -1672,6 +1688,31 @@ async function sendPasswordReset(){
     msg.textContent='❌ Имейла не е регистриран';
     msg.style.color='#e85d5d';
   }
+}
+
+
+// ── ACCORDION ──
+function toggleAcc(el){
+  const body = el.nextElementSibling;
+  const arrow = el.querySelector('.acc-arrow');
+  const isOpen = body.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.acc-body').forEach(b=>{b.classList.remove('open');});
+  document.querySelectorAll('.acc-arrow').forEach(a=>{a.classList.remove('open');});
+  // Open clicked if was closed
+  if(!isOpen){
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+
+// ── PREMIUM ──
+function showPremiumMsg(){
+  const msg = window._lang==='en'
+    ? '✦ AI Assistant is a Premium feature\nComing soon — stay tuned!'
+    : '✦ AI Асистентът е Premium функция\nСкоро достъпно — очаквайте!';
+  showToast(msg, 3000);
 }
 
 // close pickers on outside click
