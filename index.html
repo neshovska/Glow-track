@@ -437,10 +437,7 @@ textarea.form-input{resize:none}
   <div class="page" id="page-profile">
     <div class="page-hdr"><div class="page-hdr-title">Моят <em>профил</em></div></div>
     <div class="profile-card"><div class="profile-av" id="profile-av-wrap" style="width:80px;height:80px;border-radius:50%;border:2px solid #b8966a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#b8966a;font-family:'DM Sans',sans-serif;letter-spacing:.05em;background:rgba(184,150,106,.08)" id="profile-initials-svg">?</div><div class="profile-name" id="prof-name">—</div><div class="profile-email" id="prof-email">—</div></div>
-    <div class="profile-btns">
-      <button class="profile-btn danger" onclick="doLogout()">Изход</button>
-      <button class="profile-btn danger" onclick="confirmDeleteAccount()">🗑️ Изтрий профила</button>
-    </div>
+
     <div id="admin-panel" style="display:none;margin-top:20px">
       <div style="padding:0 18px 10px"><div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lilac)">⚙️ Admin панел</div></div>
       <div class="admin-section">
@@ -504,11 +501,14 @@ textarea.form-input{resize:none}
         </div>
       </div>
 
-      <!-- SKIN ROUTINE -->
-      <div class="profile-card-section">
-        <div class="pcs-title">🌙 Скин рутин тракер</div>
-        <div style="margin-top:10px">
-          <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">Отбележи рутините за днес:</div>
+      <!-- SKIN ROUTINE ACCORDION -->
+      <div class="acc-section profile-card-section" style="border-bottom:none">
+        <div class="acc-header" onclick="toggleAcc(this)" style="padding:0 0 0 0">
+          <span class="pcs-title">🌙 Скин рутин тракер</span>
+          <span class="acc-arrow">⌄</span>
+        </div>
+        <div class="acc-body" id="routine-acc-body">
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:10px;margin-top:8px">Отбележи рутините за днес:</div>
           <div style="display:flex;flex-direction:column;gap:8px" id="routine-list">
             <label class="routine-item"><input type="checkbox" class="routine-cb" data-r="cleanse"> <span>🫧 Почистване</span></label>
             <label class="routine-item"><input type="checkbox" class="routine-cb" data-r="tone"> <span>💧 Тонер</span></label>
@@ -516,7 +516,12 @@ textarea.form-input{resize:none}
             <label class="routine-item"><input type="checkbox" class="routine-cb" data-r="moisturize"> <span>🧴 Хидратация</span></label>
             <label class="routine-item"><input type="checkbox" class="routine-cb" data-r="spf"> <span>☀️ SPF</span></label>
           </div>
-          <div style="margin-top:12px;font-size:11px;color:var(--ink2)" id="routine-streak"></div>
+          <div id="custom-routine-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input type="text" id="custom-routine-input" class="form-input" placeholder="+ Добави стъпка..." style="flex:1;font-size:12px;padding:8px 12px">
+            <button onclick="addCustomRoutine()" style="padding:8px 14px;background:var(--gold);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:18px">+</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--sage)" id="routine-streak"></div>
         </div>
       </div>
 
@@ -556,7 +561,11 @@ textarea.form-input{resize:none}
       </div>
     </div>
     </div>
-    <div style="text-align:center;padding:16px 18px 8px;font-size:10px;color:#cbbfae">GlowTrack · build v8.0</div>
+    <div class="profile-btns" style="margin-top:16px">
+      <button class="profile-btn danger" onclick="doLogout()">Изход</button>
+      <button class="profile-btn danger" onclick="confirmDeleteAccount()">🗑️ Изтрий профила</button>
+    </div>
+    <div style="text-align:center;padding:16px 18px 8px;font-size:10px;color:#cbbfae">GlowTrack · build v8.1</div>
   </div>
   <nav class="bnav">
     <button class="nb active" onclick="goPage('procs',this)"><span class="ni">🪷</span><span class="nl">Процедури</span></button>
@@ -1852,6 +1861,7 @@ function loadProfileStats(){
     saveNotifDate();
   }
   // Load routine checkboxes
+  renderCustomRoutine();
   const today = new Date().toDateString();
   const saved = JSON.parse(localStorage.getItem('gt_routine_'+today)||'[]');
   document.querySelectorAll('.routine-cb').forEach(cb=>{
@@ -1871,6 +1881,56 @@ function loadProfileStats(){
     if(fb) fb.style.display = 'none';
     loadAdminInbox();
   }
+}
+
+
+// ── CUSTOM ROUTINE ──
+function addCustomRoutine(){
+  const inp = document.getElementById('custom-routine-input');
+  const val = inp.value.trim();
+  if(!val) return;
+  
+  // Save to localStorage
+  const today = new Date().toDateString();
+  const customs = JSON.parse(localStorage.getItem('gt_custom_routine')||'[]');
+  const id = 'custom_' + Date.now();
+  customs.push({id, label: val});
+  localStorage.setItem('gt_custom_routine', JSON.stringify(customs));
+  
+  // Add to UI
+  renderCustomRoutine();
+  inp.value = '';
+  showToast('✅ Добавено!');
+}
+
+function renderCustomRoutine(){
+  const customs = JSON.parse(localStorage.getItem('gt_custom_routine')||'[]');
+  const list = document.getElementById('custom-routine-list');
+  if(!list) return;
+  const today = new Date().toDateString();
+  const checked = JSON.parse(localStorage.getItem('gt_routine_custom_'+today)||'[]');
+  list.innerHTML = customs.map(c=>`
+    <div style="display:flex;align-items:center;gap:6px">
+      <label class="routine-item" style="flex:1">
+        <input type="checkbox" class="routine-cb-custom" data-r="${c.id}" ${checked.includes(c.id)?'checked':''}>
+        <span>${c.label}</span>
+      </label>
+      <button onclick="deleteCustomRoutine('${c.id}')" style="background:none;border:none;color:var(--ink2);cursor:pointer;font-size:16px;padding:4px">✕</button>
+    </div>`).join('');
+  
+  // Add listeners
+  document.querySelectorAll('.routine-cb-custom').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const ch = Array.from(document.querySelectorAll('.routine-cb-custom:checked')).map(c=>c.dataset.r);
+      localStorage.setItem('gt_routine_custom_'+today, JSON.stringify(ch));
+    });
+  });
+}
+
+function deleteCustomRoutine(id){
+  const customs = JSON.parse(localStorage.getItem('gt_custom_routine')||'[]');
+  localStorage.setItem('gt_custom_routine', JSON.stringify(customs.filter(c=>c.id!==id)));
+  renderCustomRoutine();
 }
 
 // close pickers on outside click
