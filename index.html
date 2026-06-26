@@ -1572,6 +1572,11 @@ async function openSheet(id){
     ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
     ${clinicAdsHTML}${productAdsHTML}
+    <div style="margin:12px 18px 8px;padding:12px 14px;background:rgba(184,150,106,.06);border-radius:12px;border-left:3px solid var(--gold)">
+      <div style="font-size:10.5px;color:var(--ink2);line-height:1.6">
+        ⭐ <strong style="color:var(--gold)">Информацията е обща и с образователна цел.</strong> Тя не замества индивидуална медицинска консултация. Преди всяка процедура се консултирайте с квалифициран специалист, който да оцени вашия конкретен случай.
+      </div>
+    </div>
 
     ${window._user?`<div class="diary-section">
       <div class="diary-section-title">Моят <em>дневник</em></div>
