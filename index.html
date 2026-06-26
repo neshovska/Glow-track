@@ -1275,10 +1275,14 @@ async function doLogin(){
   const pass=document.getElementById('login-pass').value;
   if(!email||!pass){showAuthError('Попълни всички полета');return;}
   const btn=document.getElementById('login-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{await F().signInWithEmailAndPassword(AU(),email,pass);}
+  try{
+    const result = await signInWithEmailAndPassword(AU(),email,pass);
+    if(!result) throw new Error('No result');
+  }
   catch(e){
-    console.log('Login error:',e.code,e.message);
-    showAuthError(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'?'Акаунтът не съществува или паролата е грешна':e.code==='auth/invalid-email'?'Невалиден имейл':e.code==='auth/too-many-requests'?'Твърде много опити — изчакай малко':('Грешка: '+e.code));
+    console.log('Login error:',e?.code,e?.message);
+    const errCode = e?.code||'';
+    showAuthError(errCode.includes('user-not-found')||errCode.includes('invalid-credential')||errCode.includes('wrong-password')?'Грешен имейл или парола':errCode.includes('invalid-email')?'Невалиден имейл':errCode.includes('too-many-requests')?'Твърде много опити — изчакай':errCode.includes('network')?'Проблем с мрежата':'Грешен имейл или парола');
   }finally{btn.disabled=false;btn.textContent='Влез';}
 }
 async function doRegister(){
