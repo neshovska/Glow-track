@@ -681,6 +681,35 @@ textarea.form-input{resize:none}
     </div>
   </div>
 </div>
+
+<!-- EDIT NOTIF MODAL -->
+<div id="edit-notif-modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:600">
+  <div style="position:absolute;inset:0;background:rgba(26,26,46,.45);backdrop-filter:blur(6px)" onclick="closeEditNotif()"></div>
+  <div style="position:relative;background:#fff;border-radius:20px;padding:22px;margin:0 24px;width:100%;max-width:340px;box-shadow:0 16px 48px rgba(26,26,46,.2)">
+    <div style="font-size:15px;font-weight:700;color:var(--ink1);margin-bottom:16px">✏️ Редактирай напомняне</div>
+    <input type="hidden" id="edit-notif-id">
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--ink2);margin-bottom:5px">Процедура</div>
+      <input type="text" id="edit-notif-proc-search" class="form-input" placeholder="🔍 Търси процедура..." style="font-size:12px" oninput="filterEditNotifProcs()" onfocus="showEditNotifProcs()">
+      <input type="hidden" id="edit-notif-proc-id">
+      <div id="edit-notif-dropdown" style="display:none;background:#fff;border:1px solid var(--goldlt);border-radius:10px;max-height:150px;overflow-y:auto;margin-top:4px;box-shadow:0 4px 12px rgba(26,26,46,.1)"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--ink2);margin-bottom:5px">Дата</div>
+        <input type="date" id="edit-notif-date" class="form-input" style="font-size:12px">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--ink2);margin-bottom:5px">Час</div>
+        <input type="time" id="edit-notif-time" class="form-input" style="font-size:12px;width:95px">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeEditNotif()" style="flex:1;padding:10px;border:1px solid var(--goldlt);border-radius:10px;background:none;color:var(--ink2);cursor:pointer;font-family:inherit;font-size:13px">Отмени</button>
+      <button onclick="saveEditNotif()" style="flex:1;padding:10px;background:linear-gradient(135deg,#b8966a,#d4a96a);border:none;border-radius:10px;color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600">Запази ✦</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="overlay" onclick="closeSheet(event)">
   <div class="sheet" id="sheet">
     <div class="sheet-handle"></div>
