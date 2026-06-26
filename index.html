@@ -783,6 +783,7 @@ textarea.form-input{resize:none}
       <div class="sheet-icon" id="sh-icon"></div>
       <div class="sheet-tw"><div class="sheet-cat" id="sh-cat"></div><div class="sheet-title" id="sh-title"></div></div>
       <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="shareProc()" style="background:none;border:none;font-size:18px;cursor:pointer;padding:4px;line-height:1" title="Сподели">↗️</button>
         <button id="fav-btn" onclick="toggleFav()" style="background:none;border:none;font-size:22px;cursor:pointer;padding:4px;line-height:1">🤍</button>
         <button class="close-btn" onclick="closeSheet()">✕</button>
       </div>
@@ -1545,6 +1546,18 @@ async function openSheet(id){
     ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
     ${clinicAdsHTML}${productAdsHTML}
+    <div id="interval-calc-section" style="margin:0 18px 12px;padding:14px;background:linear-gradient(135deg,#faf8f5,#f5efe6);border-radius:14px;border:1px solid var(--goldlt)">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">⏱️ Калкулатор на интервали</div>
+      <div style="font-size:11px;color:var(--ink2);margin-bottom:8px">Кога е следваща препоръчана процедура?</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div style="font-size:10px;color:var(--ink2);margin-bottom:3px">Последна процедура</div>
+          <input type="date" id="calc-last-date" class="form-input" style="font-size:11px;padding:7px">
+        </div>
+      </div>
+      <button onclick="calcNextDate()" style="width:100%;margin-top:10px;padding:9px;background:var(--gold);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">Изчисли →</button>
+      <div id="calc-result" style="margin-top:8px;font-size:12px;color:var(--ink1);font-weight:600"></div>
+    </div>
     <div class="ai-chat-section">
       <button class="ai-chat-btn" onclick="showPremiumMsg()" style="opacity:.75">
         <span style="font-size:15px">✦</span>
@@ -1565,6 +1578,17 @@ async function openSheet(id){
         <div class="form-row"><label class="form-lbl">Какво каза специалистът / Препоръки</label><textarea class="form-input" id="de-advice" placeholder="Специални инструкции, допълнителни препоръки..." rows="3"></textarea></div>
         <div class="form-row"><label class="form-lbl">Лично усещане / Наблюдения</label><textarea class="form-input" id="de-feeling" placeholder="Как се чувстваш, какво забелязваш след процедурата..." rows="2"></textarea></div>
         <div class="form-row"><label class="form-lbl">Препоръчани продукти от специалиста</label><input class="form-input" type="text" id="de-products" placeholder="напр. La Roche-Posay Toleriane · Anthelios SPF50+"></div>
+        <div class="form-row">
+          <label class="form-lbl">💰 Цена (лв.)</label>
+          <input class="form-input" type="number" id="de-price" placeholder="напр. 120" style="width:120px">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">⭐ Оценка</label>
+          <div style="display:flex;gap:6px;margin-top:4px" id="de-rating-stars">
+            ${[1,2,3,4,5].map(i=>`<span onclick="setRating(${i})" data-star="${i}" style="font-size:24px;cursor:pointer;opacity:.3;transition:opacity .15s">⭐</span>`).join('')}
+          </div>
+          <input type="hidden" id="de-rating" value="0">
+        </div>
         <div class="photo-previews" id="de-previews"></div>
         <div class="diary-actions">
           <label class="photo-btn">📷 Снимка<input class="photo-input" type="file" accept="image/*" multiple onchange="addPhotos(event)"></label>
@@ -1577,6 +1601,10 @@ async function openSheet(id){
   // Scroll to top
   document.getElementById('sh-body').scrollTop=0;
   updateFavBtn(id);
+  // Set today in calculator
+  const calcDate = document.getElementById('calc-last-date');
+  if(calcDate) calcDate.value = new Date().toISOString().split('T')[0];
+  document.getElementById('calc-result') && (document.getElementById('calc-result').innerHTML='');
 }
 
 function renderEntryCard(docSnap){
@@ -1589,6 +1617,8 @@ function renderEntryCard(docSnap){
     ${!isRoutineEntry&&(d.clinic||d.specialist)?`<div class="entry-field"><span class="lbl">🏥 Клиника / Специалист</span>${[d.clinic,d.specialist].filter(Boolean).join(' · ')}${d.contact?' · '+d.contact:''}</div>`:''}
     ${d.advice&&!isRoutineEntry?`<div class="entry-field"><span class="lbl">👩‍⚕️ Препоръки от специалиста</span>${d.advice}</div>`:''}
     ${isRoutineEntry&&d.advice?`<div class="entry-field">${d.advice}</div>`:''}
+    ${d.rating>0?`<div class="entry-field"><span class="lbl">⭐ Оценка</span>${'⭐'.repeat(d.rating)}${'☆'.repeat(5-d.rating)}</div>`:''}
+    ${d.price>0?`<div class="entry-field"><span class="lbl">💰 Цена</span>${d.price} лв.</div>`:''}
     ${d.feeling?`<div class="entry-field"><span class="lbl">💬 Лично усещане</span>${d.feeling}</div>`:''}
     ${photos.length?`<div class="entry-photos">${photos.map(ph=>`<img class="entry-photo" src="${ph}" onclick="openLightbox('${ph}')">`).join('')}</div>`:''}
     ${d.products&&!isRoutineEntry?`<div class="entry-field" style="margin-top:6px"><span class="lbl">🧴 Препоръчани продукти</span><span class="product-chip">${d.products}</span></div>`:''}
@@ -3035,6 +3065,75 @@ async function loadAdminStats(){
       ${topProcs}`;
   }catch(e){ statsEl.innerHTML = '<div style="font-size:12px;color:var(--ink2)">Грешка при зареждане</div>'; }
 }
+
+
+// ── SHARE PROCEDURE ──
+function shareProc(){
+  const title = document.getElementById('sh-title')?.textContent || 'GlowTrack';
+  const text = 'Разгледай процедурата: ' + title + ' в GlowTrack';
+  if(navigator.share){
+    navigator.share({title: 'GlowTrack · '+title, text, url: 'https://neshovska.github.io/glowtrack/'})
+      .catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText('https://neshovska.github.io/glowtrack/').then(()=>{
+      showToast('✅ Линкът е копиран!');
+    });
+  }
+}
+
+// ── RATING ──
+function setRating(val){
+  document.getElementById('de-rating').value = val;
+  document.querySelectorAll('#de-rating-stars span').forEach((s,i)=>{
+    s.style.opacity = i < val ? '1' : '.25';
+    s.style.transform = i < val ? 'scale(1.1)' : 'scale(1)';
+  });
+}
+
+// ── INTERVAL CALCULATOR ──
+function calcNextDate(){
+  const lastDate = document.getElementById('calc-last-date').value;
+  if(!lastDate){showToast('Избери дата');return;}
+  const proc = window.PROCS?.find(p=>p.id===window.currentProcId);
+  const interval = proc?.interval || '';
+  const result = document.getElementById('calc-result');
+  
+  // Parse interval from proc data (e.g. "Лице: 30–40 дни")
+  const match = interval.match(/(\d+)[–-](\d+)/);
+  if(match){
+    const minDays = parseInt(match[1]);
+    const maxDays = parseInt(match[2]);
+    const dt = new Date(lastDate);
+    const minNext = new Date(dt); minNext.setDate(dt.getDate()+minDays);
+    const maxNext = new Date(dt); maxNext.setDate(dt.getDate()+maxDays);
+    const fmt = d => d.toLocaleDateString('bg-BG',{day:'numeric',month:'long'});
+    result.innerHTML = `🗓️ Следваща: <span style="color:var(--gold)">${fmt(minNext)} — ${fmt(maxNext)}</span>`;
+    
+    // Suggest adding reminder
+    result.innerHTML += `<br><button onclick="suggestReminder('${lastDate}',${minDays},${maxDays})" style="margin-top:6px;background:none;border:1px solid var(--goldlt);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--gold);cursor:pointer">+ Добави напомняне</button>`;
+  } else {
+    result.innerHTML = `<span style="color:var(--ink2)">Интервалът зависи от зоната — консултирай се с специалист</span>`;
+  }
+}
+
+function suggestReminder(lastDate, minDays, maxDays){
+  const avg = Math.round((minDays+maxDays)/2);
+  const dt = new Date(lastDate);
+  dt.setDate(dt.getDate()+avg);
+  const dateStr = dt.toISOString().split('T')[0];
+  const proc = window.PROCS?.find(p=>p.id===window.currentProcId);
+  const procName = (proc?.icon||'🔔')+' '+(proc?.name||'Процедура');
+  
+  const saved = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
+  saved.push({id:'n_'+Date.now(), procId:window.currentProcId, procName, date:dateStr, time:'10:00'});
+  localStorage.setItem('gt_notifs', JSON.stringify(saved));
+  const upcoming = saved.filter(n=>new Date(n.date)>=new Date()).length;
+  updateNotifBadge(upcoming);
+  showToast('✅ Напомнянето е добавено!');
+  document.getElementById('calc-result').querySelector('button')?.remove();
+}
+
+// ── SAVE PRICE & RATING with diary entry ──
 
 // close pickers on outside click
 document.addEventListener('click',e=>{
