@@ -1615,7 +1615,10 @@ async function loadDiaryTab(){
         ondragstart="diaryDragStart(event)" ondragover="diaryDragOver(event)" 
         ondrop="diaryDrop(event)" ondragend="diaryDragEnd(event)">
         <div class="diary-group-hdr" onclick="toggleGroup('dg-${pid}')">
-          ${!isPinned?'<div class="drag-handle" onclick="event.stopPropagation()">⠿</div>':'<div style="width:8px"></div>'}
+          ${!isPinned?`<div style="display:flex;flex-direction:column;gap:2px;padding:0 6px" onclick="event.stopPropagation()">
+            <button onclick="moveDiaryGroup('${pid}',-1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▲</button>
+            <button onclick="moveDiaryGroup('${pid}',1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▼</button>
+          </div>`:'<div style="width:28px"></div>'}
           <div class="diary-group-icon" style="background:${bg}">${icon}</div>
           <div class="diary-group-info"><div class="diary-group-name">${name}</div><div class="diary-group-meta">Последно: ${lastDate}</div></div>
           <span class="diary-group-count">${g.entries.length} записа</span>
@@ -2698,6 +2701,29 @@ function diaryDragEnd(e){
   e.currentTarget.classList.remove('dragging');
   document.querySelectorAll('.diary-group').forEach(el=>el.classList.remove('drag-over'));
   _dragSrc = null;
+}
+
+
+// ── DIARY ORDER ──
+function moveDiaryGroup(pid, dir){
+  const list = document.getElementById('diary-sortable');
+  if(!list) return;
+  const items = Array.from(list.querySelectorAll('.diary-group[data-pid]'));
+  const pinned = ['home-care-morning','home-care-evening'];
+  const movable = items.filter(el=>!pinned.includes(el.dataset.pid));
+  const idx = movable.findIndex(el=>el.dataset.pid===pid);
+  if(idx<0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= movable.length) return;
+  const target = movable[newIdx];
+  if(dir === -1) target.before(movable[idx]);
+  else target.after(movable[idx]);
+  // Save order
+  const newOrder = Array.from(list.querySelectorAll('.diary-group[data-pid]'))
+    .map(el=>el.dataset.pid)
+    .filter(p=>!pinned.includes(p));
+  localStorage.setItem('gt_diary_order', JSON.stringify(newOrder));
+  showToast('✅ Редът е запазен');
 }
 
 // close pickers on outside click
