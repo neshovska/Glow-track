@@ -1273,7 +1273,7 @@ async function doLogin(){
   const pass=document.getElementById('login-pass').value;
   if(!email||!pass){showAuthError('Попълни всички полета');return;}
   const btn=document.getElementById('login-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{await F().setPersistence(AU(),F().browserLocalStoragePersistence);await F().signInWithEmailAndPassword(AU(),email,pass);}
+  try{await setPersistence(AU(),browserLocalStoragePersistence);await F().signInWithEmailAndPassword(AU(),email,pass);}
   catch(e){
     showAuthError(e.code==='auth/user-not-found'?'Акаунтът не съществува':e.code==='auth/invalid-email'?'Невалиден имейл':'Грешен имейл или парола');
   }finally{btn.disabled=false;btn.textContent='Влез';}
