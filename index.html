@@ -2713,9 +2713,14 @@ async function saveRoutine(type){
         localStorage.setItem(savedKey, '1');
         showToast((type==='morning'?'☀️':'🌙')+' Запазено в дневника!');
         if(document.getElementById('page-diary')?.classList.contains('active')) loadDiaryTab();
+        // Auto-close accordion
+        const accBody = document.getElementById('routine-acc-body') || document.querySelector('.acc-body.open');
+        if(accBody){ accBody.classList.remove('open'); const arr=accBody.previousElementSibling?.querySelector('.acc-arrow'); if(arr) arr.classList.remove('open'); }
       } catch(e){}
     } else {
       showToast('✅ Рутината е запазена!');
+      const accBody = document.getElementById('routine-acc-body') || document.querySelector('.acc-body.open');
+      if(accBody){ accBody.classList.remove('open'); const arr=accBody.previousElementSibling?.querySelector('.acc-arrow'); if(arr) arr.classList.remove('open'); }
     }
   } else {
     showToast('✅ Запазено!');
