@@ -762,12 +762,48 @@ textarea.form-input{resize:none}
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,deleteUser,setPersistence,browserLocalStoragePersistence}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,deleteUser}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 const fb=initializeApp({apiKey:"AIzaSyAssUyJ9xhc9JfDbuKWjM9GLsqdlnrkFa8",authDomain:"after-care-treatment.firebaseapp.com",projectId:"after-care-treatment",storageBucket:"after-care-treatment.firebasestorage.app",messagingSenderId:"771928458805",appId:"1:771928458805:web:770106c907426147d1137c"});
 const auth=getAuth(fb);const db=getFirestore(fb);
 window._auth=auth;window._db=db;
-window._f={createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile,deleteUser,setPersistence,browserLocalStoragePersistence,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp};
+window._f={createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile,deleteUser,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp};
+
+// Auth functions defined HERE inside module scope - direct access to imports
+window.doLogin=async function(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){window.showAuthError('Попълни всички полета');return;}
+  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='...';
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    console.error('LOGIN ERR',e.code,e.message);
+    window.showAuthError('Грешен имейл или парола');
+  }finally{btn.disabled=false;btn.textContent='Влез';}
+};
+
+window.doRegister=async function(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  if(!name||!email||!pass){window.showAuthError('Попълни всички полета');return;}
+  if(pass.length<6){window.showAuthError('Паролата трябва да е поне 6 символа');return;}
+  const btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='...';
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,name,email,createdAt:serverTimestamp()});
+  }catch(e){
+    console.error('REG ERR',e.code,e.message);
+    window.showAuthError(e.code==='auth/email-already-in-use'?'Имейлът вече е регистриран':'Грешка при регистрация');
+  }finally{btn.disabled=false;btn.textContent='Създай акаунт';}
+};
+
+window.doLogout=async function(){
+  await signOut(auth);
+  window.showToast&&window.showToast('Излязохте');
+};
 onAuthStateChanged(auth,async user=>{
   if(user){
     window._user=user;
@@ -846,51 +882,6 @@ onAuthStateChanged(auth,async user=>{
   }
 });
 
-// Auth functions inside module scope
-window.doLogin = async function(){
-  const clearAuthError = window.clearAuthError || (()=>{});
-  const showAuthError = window.showAuthError || ((m)=>{alert(m);});
-  clearAuthError();
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  if(!email||!pass){showAuthError('Попълни всички полета');return;}
-  const btn = document.getElementById('login-btn');
-  btn.disabled=true; btn.textContent='...';
-  try{
-    await signInWithEmailAndPassword(auth, email, pass);
-  }catch(e){
-    console.log('Login error:', e.code, e.message);
-    const c = e.code||'';
-    showAuthError(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')?'Грешен имейл или парола':c.includes('too-many-requests')?'Твърде много опити — изчакай':'Грешен имейл или парола');
-  }finally{btn.disabled=false;btn.textContent='Влез';}
-};
-
-window.doRegister = async function(){
-  const clearAuthError = window.clearAuthError || (()=>{});
-  const showAuthError = window.showAuthError || ((m)=>{alert(m);});
-  clearAuthError();
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass = document.getElementById('reg-pass').value;
-  if(!name||!email||!pass){showAuthError('Попълни всички полета');return;}
-  if(pass.length<6){showAuthError('Паролата трябва да е поне 6 символа');return;}
-  const btn = document.getElementById('reg-btn');
-  btn.disabled=true; btn.textContent='...';
-  try{
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, {displayName: name});
-    await setDoc(doc(db,'users',cred.user.uid), {uid:cred.user.uid, name, email, createdAt:serverTimestamp()});
-  }catch(e){
-    console.log('Reg error:', e.code, e.message);
-    const c = e.code||'';
-    showAuthError(c.includes('email-already-in-use')?'Имейлът вече е регистриран':c.includes('weak-password')?'Паролата е твърде слаба':'Грешка при регистрация');
-  }finally{btn.disabled=false;btn.textContent='Създай акаунт';}
-};
-
-window.doLogout = async function(){
-  await signOut(auth);
-  window.showToast && window.showToast('Излязохте');
-};
 </script>
 <script>
 
@@ -1315,39 +1306,9 @@ function clearAuthError(){document.getElementById('auth-error').classList.remove
 function showReg(){document.getElementById('login-form').style.display='none';document.getElementById('reg-form').style.display='block';clearAuthError();}
 function showLogin(){document.getElementById('reg-form').style.display='none';document.getElementById('login-form').style.display='block';clearAuthError();}
 
-async function doLogin(){
-  clearAuthError();
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  if(!email||!pass){showAuthError('Попълни всички полета');return;}
-  const btn=document.getElementById('login-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{
-    await window._f.signInWithEmailAndPassword(window._auth, email, pass);
-  }catch(e){
-    console.log('Login error:',e?.code,e?.message);
-    const errCode = e?.code||'';
-    showAuthError(errCode.includes('user-not-found')||errCode.includes('invalid-credential')||errCode.includes('wrong-password')?'Грешен имейл или парола':errCode.includes('invalid-email')?'Невалиден имейл':errCode.includes('too-many-requests')?'Твърде много опити — изчакай':'Грешен имейл или парола');
-  }finally{btn.disabled=false;btn.textContent='Влез';}
-}
-async function doRegister(){
-  clearAuthError();
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!pass){showAuthError('Попълни всички полета');return;}
-  if(pass.length<6){showAuthError('Паролата трябва да е поне 6 символа');return;}
-  const btn=document.getElementById('reg-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{
-    const cred=await window._f.createUserWithEmailAndPassword(window._auth,email,pass);
-    await window._f.updateProfile(cred.user,{displayName:name});
-    await window._f.setDoc(window._f.doc(window._db,'users',cred.user.uid),{uid:cred.user.uid,name,email,createdAt:window._f.serverTimestamp()});
-  }catch(e){
-    console.log('Reg error:',e?.code,e?.message);
-    const ec=e?.code||'';
-    showAuthError(ec.includes('email-already-in-use')?'Имейлът вече е регистриран':ec.includes('weak-password')?'Паролата е твърде слаба':'Грешка при регистрация: '+ec);
-  }finally{btn.disabled=false;btn.textContent='Създай акаунт';}
-}
-async function doLogout(){await window._f.signOut(window._auth);showToast('Излязохте');}
+// doLogin defined in module
+// doRegister defined in module
+// doLogout defined in module
 async function confirmDeleteAccount(){
   if(!confirm('Изтрий профила и всички данни?\nТова е необратимо.'))return;
   try{
