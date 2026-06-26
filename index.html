@@ -2174,6 +2174,11 @@ function saveNotifDate(){
 
 function loadProfileStats(){
   if(!window._user) return;
+  // Always hide admin panel first, show only if admin
+  const ap = document.getElementById('admin-panel');
+  if(ap) ap.style.display = window._isAdmin ? 'block' : 'none';
+  const aiw = document.getElementById('admin-inbox-wrap');
+  if(aiw) aiw.style.display = 'none'; // reset, will be shown if admin below
   // Load diary count
   try {
     F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid))).then(s=>{
