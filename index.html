@@ -775,10 +775,10 @@ onAuthStateChanged(auth,async user=>{
     // Login splash animation
     const loginSplash = document.getElementById('splash');
     const loginLogo = document.getElementById('splash-logo');
-    loginSplash.style.display = 'flex';
-    loginSplash.style.opacity = '1';
-    loginLogo.style.transform = 'scale(0.3)';
-    loginLogo.style.opacity = '0';
+    if(loginSplash) loginSplash.style.display = 'flex';
+    if(loginSplash) loginSplash.style.opacity = '1';
+    if(loginLogo){ loginLogo.style.transform = 'scale(0.3)';
+    loginLogo.style.opacity = '0';}
     setTimeout(()=>{
       loginLogo.style.transform = 'scale(1)';
       loginLogo.style.opacity = '1';
@@ -818,15 +818,17 @@ onAuthStateChanged(auth,async user=>{
         btn.style.cursor='pointer';
       });
       const nbtns=document.querySelectorAll('.nb-soon');
-      if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};nbtns[0].querySelector('.ni').textContent='🏥';nbtns[0].querySelector('.nl').textContent='Клиники';}
-      if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};nbtns[1].querySelector('.ni').textContent='🧴';nbtns[1].querySelector('.nl').textContent='Продукти';}
+      if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};const ni0=nbtns[0].querySelector('.nl');if(ni0)ni0.textContent='Клиники';}
+      if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};const ni1=nbtns[1].querySelector('.nl');if(ni1)ni1.textContent='Продукти';}
     }
     loadClinicsTab();loadProductsTab();
     // Restore last page
     const _lastPage = localStorage.getItem('gt_last_page');
     if(_lastPage && _lastPage !== 'procs'){
-      const _lastBtn = document.querySelector(`[onclick*="goPage('${_lastPage}"]`);
-      if(_lastBtn) goPage(_lastPage, _lastBtn);
+      try{
+        const _lastBtn = document.querySelector('[onclick*="goPage(\''+_lastPage+'\'"');
+        if(_lastBtn) goPage(_lastPage, _lastBtn);
+      }catch(e){}
     }
     // checkReminders disabled — using notifications tab instead
     // Init notif badge = total count
@@ -1275,7 +1277,8 @@ async function doLogin(){
   const btn=document.getElementById('login-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
   try{await F().signInWithEmailAndPassword(AU(),email,pass);}
   catch(e){
-    showAuthError(e.code==='auth/user-not-found'?'Акаунтът не съществува':e.code==='auth/invalid-email'?'Невалиден имейл':'Грешен имейл или парола');
+    console.log('Login error:',e.code,e.message);
+    showAuthError(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'?'Акаунтът не съществува или паролата е грешна':e.code==='auth/invalid-email'?'Невалиден имейл':e.code==='auth/too-many-requests'?'Твърде много опити — изчакай малко':('Грешка: '+e.code));
   }finally{btn.disabled=false;btn.textContent='Влез';}
 }
 async function doRegister(){
@@ -1291,7 +1294,8 @@ async function doRegister(){
     await F().updateProfile(cred.user,{displayName:name});
     await F().setDoc(F().doc(DB(),'users',cred.user.uid),{uid:cred.user.uid,name,email,createdAt:F().serverTimestamp()});
   }catch(e){
-    showAuthError(e.code==='auth/email-already-in-use'?'Имейлът вече е регистриран':'Грешка при регистрация');
+    console.log('Reg error:',e.code,e.message);
+    showAuthError(e.code==='auth/email-already-in-use'?'Имейлът вече е регистриран':e.code==='auth/weak-password'?'Паролата е твърде слаба':('Грешка: '+e.code));
   }finally{btn.disabled=false;btn.textContent='Създай акаунт';}
 }
 async function doLogout(){await F().signOut(AU());showToast('Излязохте');}
