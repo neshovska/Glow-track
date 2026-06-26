@@ -123,9 +123,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .ai-input{flex:1;border:1px solid var(--goldlt);border-radius:22px;padding:10px 14px;font-size:13px;font-family:inherit;outline:none;background:#faf8f5}
 .ai-input:focus{border-color:var(--gold)}
 .ai-send-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#b8966a,#d4a96a);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ai-chat-section{padding:0 18px 4px}
-.ai-chat-btn{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;border:1px solid var(--goldlt);background:linear-gradient(135deg,#faf8f5,#f5efe6);cursor:pointer;font-family:inherit;font-size:13px;color:var(--ink1);font-weight:500;box-shadow:0 2px 8px rgba(184,150,106,.1)}
-.ai-chat-btn span:nth-child(2){flex:1;text-align:left}
 .feedback-section{margin:16px 18px 0;background:#faf8f5;border-radius:16px;padding:16px;border:1px solid var(--goldlt)}
 .feedback-title{font-size:14px;font-weight:700;color:var(--ink1);margin-bottom:2px}
 .feedback-sub{font-size:11px;color:var(--ink2);margin-bottom:12px}
@@ -1552,18 +1549,12 @@ async function openSheet(id){
     ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
     ${clinicAdsHTML}${productAdsHTML}
-    <div class="ai-chat-section">
-      <button class="ai-chat-btn" onclick="showPremiumMsg()" style="opacity:.75">
-        <span style="font-size:15px">✦</span>
-        <span>${t('aiChatBtn')}</span>
-        <span style="font-size:10px;background:linear-gradient(135deg,#b8966a,#d4a96a);color:#fff;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.05em">PREMIUM</span>
-      </button>
-    </div>
+
     ${window._user?`<div class="diary-section">
       <div class="diary-section-title">Моят <em>дневник</em></div>
       <div id="de-entries-list">${diaryEntriesHTML}</div>
-      <button onclick="toggleNewEntry()" id="new-entry-btn" style="width:100%;margin-top:10px;padding:11px;background:#fff;border:1.5px dashed var(--goldlt);border-radius:12px;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:left">
-        📝 ${t('newEntry')} ${fmtDate(new Date())}
+      <button onclick="toggleNewEntry()" id="new-entry-btn" style="width:100%;margin-top:10px;padding:14px;background:linear-gradient(135deg,rgba(184,150,106,.1),rgba(212,169,106,.08));border:1.5px solid var(--gold);border-radius:14px;color:var(--gold);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;letter-spacing:.02em">
+        ✦ ${t('newEntry')} ${fmtDate(new Date())}
       </button>
       <div class="diary-form" id="new-entry-form" style="display:none;margin-top:10px">
         <div class="form-row"><label class="form-lbl">${t('clinic')}</label><input class="form-input" type="text" id="de-clinic" placeholder="${t('clinicPh')}"></div>
