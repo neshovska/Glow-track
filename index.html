@@ -126,6 +126,15 @@ body.dark .device-tag{background:rgba(184,168,224,.15);color:#c8b8f0;border-colo
 body.dark .sheet-body [style*="background:#fff"]{background:#252545!important}
 body.dark .sheet-body [style*="background: #fff"]{background:#252545!important}
 body.dark .care-item,.dark .care-item{background:#1e1e38}
+
+/* ── SKELETON LOADING ── */
+.skeleton-wrap{padding:16px 0}
+.skeleton{background:linear-gradient(90deg,var(--roselt) 25%,var(--goldlt) 50%,var(--roselt) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;margin-bottom:10px}
+.skeleton-title{height:18px;width:60%}
+.skeleton-line{height:13px;width:100%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+body.dark .skeleton{background:linear-gradient(90deg,#1e1e38 25%,#252545 50%,#1e1e38 75%);background-size:200% 100%}
+
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-height:100vh;color:var(--ink);overflow-x:hidden}
 .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 8%,rgba(155,142,196,.1),transparent 55%),radial-gradient(ellipse 50% 60% at 88% 92%,rgba(184,150,106,.08),transparent 50%),#f7f5f2}
@@ -581,6 +590,10 @@ textarea.form-input{resize:none}
             <div class="stat-box"><div class="stat-num" id="stat-favs"><span style="font-size:18px">🤍</span></div><div class="stat-lbl">Любими</div></div>
             <div class="stat-box"><div class="stat-num" id="stat-procs"><span style="font-size:13px;font-weight:900;color:#b8966a;opacity:.5;letter-spacing:.05em">GT</span></div><div class="stat-lbl">Процедури</div></div>
           </div>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <div class="stat-box"><div class="stat-num" id="stat-spend" style="font-size:16px">—</div><div class="stat-lbl">Похарчени €</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-rating" style="font-size:16px">—</div><div class="stat-lbl">Средна оценка</div></div>
+          </div>
           <div id="stat-last-proc" style="margin-top:10px;padding:9px 12px;background:var(--goldlt);border-radius:10px;font-size:11.5px;color:var(--ink2);display:none">
             <span style="color:var(--gold)">✦ Последна процедура:</span> <span id="stat-last-proc-name" style="color:var(--ink);font-weight:600"></span> · <span id="stat-last-proc-date" style="color:var(--ink2)"></span>
           </div>
@@ -1002,7 +1015,21 @@ const CATS_LIST=[
   {id:'derm',label:'Дерматология',icon:'🩺'},
 ];
 
-window.PROCS=window.PROCS||[];const PROCS=[
+window.PROCS=window.PROCS||[];
+
+// ── GLOBAL CACHE ──
+window._cache = {
+  diary: null,          // all diary entries for current user
+  diaryTs: 0,          // timestamp of last fetch
+  clinicAds: null,     // all clinic ads
+  productAds: null,    // all product ads
+  adsTs: 0,
+  CACHE_TTL: 5 * 60 * 1000  // 5 minutes
+};
+function cacheInvalid(ts){ return !ts || (Date.now() - ts) > window._cache.CACHE_TTL; }
+function invalidateCache(){ window._cache.diary=null; window._cache.diaryTs=0; window._cache.clinicAds=null; window._cache.productAds=null; window._cache.adsTs=0; }
+
+const PROCS=[
 {id:'le-alex-face',cat:'laser',subcat:"Александритен лазер",icon:'⚡',bg:'#eeeaf8',fg:'#9b8ec4',name:"Александритен лазер — Лице",sub:"755nm · Светла кожа, тъмен косъм",what:"Александритеният лазер (755nm) е най-ефективен за светла до средно тъмна кожа с тъмен косъм. Прецизно таргетира меланина в фоликула. Бърз и ефективен при по-малки зони.",devices:['Candela GentleLase Pro','Syneron-Candela Alexandrite 755nm','Cynosure Elite+'],zones:'Горна устна, брадичка, скули, бакенбарди, ареоли, оформяне на вежди/линия на косата',results:['70–90% трайно намаляване след пълен курс от 6–10 сесии','Космите падат <strong>10–14 дни</strong> след сесията','Постепенно изтъняване от 2–3 сесия нататък','Пълна оценка на резултата 3 месеца след последната сесия'],contra:['Бременност и кърмене','Активен тен или скорошно слънцегарене','Активни кожни инфекции или херпес','Фоточувствителни медикаменти (Roaccutane, антибиотици)','Татуировки в третираната зона'],before:[['🪒',"Обръсни зоната <strong>24–48ч преди</strong> — не скубай, не използвай кола маска"],['☀️',"Без слънце и солариум <strong>2–4 седмици</strong>"],['🧴',"Без автобронзанти 2 седмици"],['💊',"Уведоми специалиста за всички медикаменти"]],after:[['🧴',"Нанасяй <strong>Алое Вера 100%</strong> или успокояващ крем"],['🧴',"<strong>SPF 50+</strong> — задължително при излагане"],['🚿',"<strong>Хладки</strong> душове 24–48ч"],['🚫',"НЕ сауна, джакузи, басейн 24–48ч"],['🏋️',"НЕ интензивен спорт в деня"],['✂️',"Между сесиите — само бръснене"]],interval:'Лице: 30–40 дни · Торс: 45–60 дни · Крака: 60–90 дни',sessions:'6–10 сесии'},
 {id:'le-alex-body',cat:'laser',subcat:"Александритен лазер",icon:'⚡',bg:'#eeeaf8',fg:'#9b8ec4',name:"Александритен лазер — Тяло",sub:"755nm · Подмишници, ръце, крака, интимна зона",what:"Александритеният лазер работи отлично на по-светли типове кожа. Особено ефективен при фини до средни косъмчета. По-бърз при покриване на по-обширни зони.",devices:['Candela GentleLase Pro','Cynosure Elite+','Syneron Alexandrite'],zones:'Подмишници, ръце (1/2 или цели), крака (1/2 или цели), интимна зона, корем, гръб, гърди, седалище, рамене',results:['70–90% трайно намаляване след пълен курс от 6–10 сесии','Космите падат <strong>10–14 дни</strong> след сесията','Постепенно изтъняване от 2–3 сесия нататък','Пълна оценка на резултата 3 месеца след последната сесия'],contra:['Бременност и кърмене','Активен тен или скорошно слънцегарене','Активни кожни инфекции или херпес','Фоточувствителни медикаменти (Roaccutane, антибиотици)','Татуировки в третираната зона'],before:[['🪒',"Обръсни зоната <strong>24–48ч преди</strong> — не скубай, не използвай кола маска"],['☀️',"Без слънце и солариум <strong>2–4 седмици</strong>"],['🧴',"Без автобронзанти 2 седмици"],['💊',"Уведоми специалиста за всички медикаменти"]],after:[['🧴',"Нанасяй <strong>Алое Вера 100%</strong> или успокояващ крем"],['🧴',"<strong>SPF 50+</strong> — задължително при излагане"],['🚿',"<strong>Хладки</strong> душове 24–48ч"],['🚫',"НЕ сауна, джакузи, басейн 24–48ч"],['🏋️',"НЕ интензивен спорт в деня"],['✂️',"Между сесиите — само бръснене"]],interval:'Лице: 30–40 дни · Торс: 45–60 дни · Крака: 60–90 дни',sessions:'6–10 сесии — интервалът се разширява с напредването по препоръка на терапевт'},
 {id:'le-diode-face',cat:'laser',subcat:"Диоден лазер",icon:'⚡',bg:'#eeeaf8',fg:'#9b8ec4',name:"Диоден лазер — Лице",sub:"810nm · Универсален, всички типове кожа",what:"Диодният лазер (810nm) е универсалният стандарт — ефективен при широк диапазон от кожни типове. Soprano ICE с охлаждане прави процедурата практически безболезнена.",devices:['Alma Soprano ICE / ICE Platinum','Lumenis LightSheer','InMode Diolaze'],zones:'Горна устна, брадичка, скули, бакенбарди, ареоли, шия, оформяне на линия на косата',results:['70–90% трайно намаляване след пълен курс от 6–10 сесии','Космите падат <strong>10–14 дни</strong> след сесията','Постепенно изтъняване от 2–3 сесия нататък','Пълна оценка на резултата 3 месеца след последната сесия'],contra:['Бременност и кърмене','Активен тен или скорошно слънцегарене','Активни кожни инфекции или херпес','Фоточувствителни медикаменти (Roaccutane, антибиотици)','Татуировки в третираната зона'],before:[['🪒',"Обръсни зоната <strong>24–48ч преди</strong> — не скубай, не използвай кола маска"],['☀️',"Без слънце и солариум <strong>около 5 дни</strong>"],['🧴',"Без автобронзанти 2 седмици"],['💊',"Уведоми специалиста за всички медикаменти"]],after:[['🧴',"Нанасяй <strong>Алое Вера 100%</strong> или успокояващ крем"],['🧴',"<strong>SPF 50+</strong> — задължително при излагане"],['🚿',"<strong>Хладки</strong> душове 24–48ч"],['🚫',"НЕ сауна, джакузи, басейн 24–48ч"],['🏋️',"НЕ интензивен спорт в деня"],['✂️',"Между сесиите — само бръснене"]],interval:'Лице: 30–40 дни · Торс: 45–60 дни · Крака: 60–90 дни',sessions:'6–10 сесии'},
@@ -1487,7 +1514,9 @@ function renderProcs(){
   const filtered=PROCS.filter(p=>{
     const catOk=activeCat==='all'||p.cat===activeCat;
     if(!s) return catOk;
-    const hay=(p.name+' '+p.sub+' '+(p.subcat||'')+' '+(p.what||'')+' '+(p.zones||'')).toLowerCase();
+    const en=PROCS_EN[p.id]||{};
+    const hay=(p.name+' '+p.sub+' '+(p.subcat||'')+' '+(p.what||'')+' '+(p.zones||'')
+      +' '+(en.name||'')+' '+(en.sub||'')+' '+(en.subcat||'')).toLowerCase();
     return catOk && sWords.every(w=>hay.includes(w));
   });
   document.getElementById('no-results').style.display=filtered.length?'none':'block';
@@ -1542,33 +1571,64 @@ async function openSheet(id){
   const catLabel = (window._lang==='en' && CATS_EN[p.cat]) ? CATS_EN[p.cat] : (CATS_LIST.find(c=>c.id===p.cat)?.label||p.cat);
   document.getElementById('sh-cat').textContent=catLabel;
   document.getElementById('sh-title').textContent=lp.name;
+
+  // Show overlay immediately, skeleton in body
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('sh-body').innerHTML=`
+    <div class="skeleton-wrap">
+      <div class="skeleton skeleton-title"></div>
+      <div class="skeleton skeleton-line"></div>
+      <div class="skeleton skeleton-line" style="width:75%"></div>
+      <div class="skeleton skeleton-line" style="width:85%"></div>
+      <div style="height:16px"></div>
+      <div class="skeleton skeleton-title" style="width:40%"></div>
+      <div class="skeleton skeleton-line"></div>
+      <div class="skeleton skeleton-line" style="width:60%"></div>
+    </div>`;
+
   let clinicAdsHTML='',productAdsHTML='',diaryEntriesHTML='';
+
+  // ── FETCH ADS (cached) ──
   try{
-    const [cSnap,pSnap]=await Promise.all([
-      F().getDocs(F().query(F().collection(DB(),'clinic_ads'),F().where('procIds','array-contains',id))),
-      F().getDocs(F().query(F().collection(DB(),'product_ads'),F().where('procIds','array-contains',id)))
-    ]);
-    if(!cSnap.empty)clinicAdsHTML=`<div class="info-section"><div class="info-title">🏥 Клиники предлагащи тази процедура</div>
-      ${cSnap.docs.map(d=>{const a=d.data();return`<div class="clinic-ad-card">
+    if(cacheInvalid(window._cache.adsTs)){
+      const [cSnap,pSnap]=await Promise.all([
+        F().getDocs(F().collection(DB(),'clinic_ads')),
+        F().getDocs(F().collection(DB(),'product_ads'))
+      ]);
+      window._cache.clinicAds=cSnap.docs.map(d=>({id:d.id,...d.data()}));
+      window._cache.productAds=pSnap.docs.map(d=>({id:d.id,...d.data()}));
+      window._cache.adsTs=Date.now();
+    }
+    const clinicsForProc=(window._cache.clinicAds||[]).filter(a=>(a.procIds||[]).includes(id));
+    const productsForProc=(window._cache.productAds||[]).filter(a=>(a.procIds||[]).includes(id));
+    if(clinicsForProc.length)clinicAdsHTML=`<div class="info-section"><div class="info-title">🏥 Клиники предлагащи тази процедура</div>
+      ${clinicsForProc.map(a=>`<div class="clinic-ad-card">
         <div class="clinic-ad-logo">${a.icon||'🏥'}</div>
         <div class="clinic-ad-info"><div class="clinic-ad-name">${a.name}</div>
         <div class="clinic-ad-sub">${[a.address,a.phone].filter(Boolean).join(' · ')}</div>
         ${a.url?`<div style="font-size:10.5px;color:var(--sage);margin-top:2px">🔗 ${a.url}</div>`:''}</div>
-        <span class="clinic-ad-badge">Партньор</span></div>`;}).join('')}</div>`;
-    if(!pSnap.empty)productAdsHTML=`<div class="info-section"><div class="info-title">🧴 Препоръчани продукти</div>
-      ${pSnap.docs.map(d=>{const a=d.data();return`<div class="product-ad-row">
+        <span class="clinic-ad-badge">Партньор</span></div>`).join('')}</div>`;
+    if(productsForProc.length)productAdsHTML=`<div class="info-section"><div class="info-title">🧴 Препоръчани продукти</div>
+      ${productsForProc.map(a=>`<div class="product-ad-row">
         <div class="product-ad-icon" style="background:${a.color||'#eeeaf8'}">${a.icon||'🧴'}</div>
         <div class="product-ad-info"><div class="product-ad-brand">${a.brand||''}</div>
         <div class="product-ad-name">${a.name}</div>
         ${a.desc?`<div class="product-ad-desc">${a.desc}</div>`:''}</div>
-        <span class="ad-label">Реклама</span></div>`;}).join('')}</div>`;
-  }catch(e){console.log('ads',e);}
+        <span class="ad-label">Реклама</span></div>`).join('')}</div>`;
+  }catch(e){}
+
+  // ── FETCH DIARY (cached) ──
   if(window._user){
     try{
-      const snap=await F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid)));
-      const entries=snap.docs.filter(d=>d.data().procId===id).sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+      if(cacheInvalid(window._cache.diaryTs)){
+        const snap=await F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid)));
+        window._cache.diary=snap.docs;
+        window._cache.diaryTs=Date.now();
+      }
+      const entries=(window._cache.diary||[]).filter(d=>d.data().procId===id).sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
       diaryEntriesHTML=entries.length?`<div class="diary-entries">${entries.map(d=>renderEntryCard(d)).join('')}</div>`:`<div style="text-align:center;padding:16px;color:var(--ink2);font-size:12px">Все още няма записи. Добави наблюдения! 📝</div>`;
-    }catch(e){console.log('diary',e);}
+    }catch(e){}
   }
   const mk=(arr,cls)=>(arr||[]).map(([em,txt])=>`<div class="care-item ${cls}"><span class="care-em">${em}</span><span class="care-txt">${txt}</span></div>`).join('');
   const notPrefix = window._lang==='en' ? 'NO' : 'НЕ';
@@ -1666,6 +1726,24 @@ function closeSheet(e){
   document.body.style.overflow='';
   currentProcId=null;pendingPhotos=[];
 }
+// Swipe down to close sheet
+(function(){
+  let _sy=0;
+  document.addEventListener('touchstart',e=>{
+    const sh=document.querySelector('.sheet');
+    if(sh&&document.getElementById('overlay').classList.contains('open'))_sy=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    const sh=document.querySelector('.sheet');
+    if(!sh||!document.getElementById('overlay').classList.contains('open'))return;
+    const dy=e.changedTouches[0].clientY-_sy;
+    if(dy>80&&sh.scrollTop<=0){
+      document.getElementById('overlay').classList.remove('open');
+      document.body.style.overflow='';
+      currentProcId=null;pendingPhotos=[];
+    }
+  },{passive:true});
+})();
 
 // ── PHOTOS ──
 function addPhotos(e){
@@ -1699,6 +1777,8 @@ async function saveDiaryEntry(procId){
   const advice=document.getElementById('de-advice')?.value.trim()||'';
   const feeling=document.getElementById('de-feeling')?.value.trim()||'';
   const products=document.getElementById('de-products')?.value.trim()||'';
+  const price=parseFloat(document.getElementById('de-price')?.value)||0;
+  const rating=parseInt(document.getElementById('de-rating')?.value)||0;
   if(!clinic&&!specialist&&!advice&&!feeling&&!pendingPhotos.length){showToast('Добави поне едно наблюдение');return;}
   const btn=document.querySelector('.save-btn');
   btn.disabled=true;btn.textContent='Запазване...';
@@ -1706,11 +1786,12 @@ async function saveDiaryEntry(procId){
   try{
     await F().addDoc(F().collection(DB(),'diary_entries'),{
       userId:window._user.uid,procId,procName:p?.name||'',procIcon:p?.icon||'',
-      clinic,specialist,contact,advice,feeling,products,photos:pendingPhotos,
+      clinic,specialist,contact,advice,feeling,products,price,rating,photos:pendingPhotos,
       createdAt:F().serverTimestamp()
     });
     showToast('✅ Записано!');
     pendingPhotos=[];
+    window._cache.diary=null; window._cache.diaryTs=0;
     await openSheet(procId);
   }catch(e){showToast('Грешка при запазване');btn.disabled=false;btn.textContent='Запази';}
 }
@@ -1772,12 +1853,12 @@ async function saveEditEntry(eid,procId){
       feeling:document.getElementById('ee-feel-'+eid)?.value.trim()||'',
       products:document.getElementById('ee-prod-'+eid)?.value.trim()||'',
     });
-    showToast('✅ Обновено!');await openSheet(procId);
+    showToast('✅ Обновено!'); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);
   }catch(e){showToast('Грешка при обновяване');}
 }
 async function deleteEntry(eid,procId){
   if(!confirm('Изтрий този запис?'))return;
-  try{await F().deleteDoc(F().doc(DB(),'diary_entries',eid));showToast('Записът е изтрит');await openSheet(procId);}
+  try{await F().deleteDoc(F().doc(DB(),'diary_entries',eid));showToast('Записът е изтрит'); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);}
   catch(e){showToast('Грешка при изтриване');}
 }
 
@@ -1787,7 +1868,12 @@ async function loadDiaryTab(){
   if(!window._user){c.innerHTML='<div class="empty-state"><div class="empty-ic">🔐</div><div class="empty-title">Влез в акаунта си</div><div class="empty-sub">За да виждаш личния си дневник</div></div>';return;}
   c.innerHTML='<div class="loading">⏳ Зарежда...</div>';
   try{
-    const snap=await F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid)));
+    if(cacheInvalid(window._cache.diaryTs)){
+      const snap=await F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid)));
+      window._cache.diary=snap.docs;
+      window._cache.diaryTs=Date.now();
+    }
+    const snap={docs:window._cache.diary||[],empty:!(window._cache.diary||[]).length};
     if(snap.empty){c.innerHTML='<div class="empty-state"><div class="empty-ic">📖</div><div class="empty-title">Дневникът е празен</div><div class="empty-sub">Отвори процедура и добави първия си запис</div></div>';return;}
     const grouped={};
     snap.docs.forEach(d=>{
@@ -1845,8 +1931,16 @@ function toggleGroup(id){const el=document.getElementById(id);if(el)el.classList
 let allClinics=[];
 async function loadClinicsTab(){
   try{
-    const snap=await F().getDocs(F().collection(DB(),'clinic_ads'));
-    allClinics=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(cacheInvalid(window._cache.adsTs)){
+      const [cSnap,pSnap]=await Promise.all([
+        F().getDocs(F().collection(DB(),'clinic_ads')),
+        F().getDocs(F().collection(DB(),'product_ads'))
+      ]);
+      window._cache.clinicAds=cSnap.docs.map(d=>({id:d.id,...d.data()}));
+      window._cache.productAds=pSnap.docs.map(d=>({id:d.id,...d.data()}));
+      window._cache.adsTs=Date.now();
+    }
+    allClinics=window._cache.clinicAds||[];
     renderClinics();
   }catch(e){}
 }
@@ -1877,6 +1971,11 @@ function renderClinics(){
 let allProducts=[];
 async function loadProductsTab(){
   try{
+    if(!cacheInvalid(window._cache.adsTs)){
+      allProducts=window._cache.productAds||[];
+      renderProducts();
+      return;
+    }
     const snap=await F().getDocs(F().collection(DB(),'product_ads'));
     allProducts=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderProducts();
@@ -2228,29 +2327,45 @@ function loadProfileStats(){
   if(aiw) aiw.style.display = 'none'; // reset, will be shown if admin below
   // Load diary count
   try {
-    F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid))).then(s=>{
+    const _loadStats = (docs) => {
       const el = document.getElementById('stat-diary');
-      if(el) el.textContent = s.size;
+      const realDocs = docs.filter(d=>!d.data().procId?.startsWith('home-care'));
+      if(el) el.textContent = realDocs.length;
       const pe = document.getElementById('stat-procs');
-      if(pe) pe.textContent = new Set(s.docs.map(d=>d.data().procId)).size;
+      if(pe) pe.textContent = new Set(realDocs.map(d=>d.data().procId)).size;
+      // Spending
+      const totalSpend = realDocs.reduce((s,d)=>s+(parseFloat(d.data().price)||0),0);
+      const spendEl = document.getElementById('stat-spend');
+      if(spendEl) spendEl.textContent = totalSpend>0 ? totalSpend.toFixed(0)+' €' : '—';
+      // Avg rating
+      const rated = realDocs.filter(d=>d.data().rating>0);
+      const avgRating = rated.length ? (rated.reduce((s,d)=>s+(d.data().rating||0),0)/rated.length) : 0;
+      const ratingEl = document.getElementById('stat-rating');
+      if(ratingEl) ratingEl.textContent = avgRating>0 ? '⭐ '+avgRating.toFixed(1) : '—';
       // Last procedure
-      if(s.size > 0){
-        const sorted = s.docs.filter(d=>d.data().createdAt&&!d.data().procId?.startsWith('home-care'))
-          .sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
-        if(sorted.length){
-          const last = sorted[0].data();
-          const lastBox = document.getElementById('stat-last-proc');
-          const lastName = document.getElementById('stat-last-proc-name');
-          const lastDate = document.getElementById('stat-last-proc-date');
-          if(lastBox&&lastName&&lastDate){
-            lastName.textContent = (last.procIcon||'✦')+' '+(last.procName||'—');
-            const d = last.createdAt?.toDate?.();
-            if(d) lastDate.textContent = d.toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
-            lastBox.style.display='block';
-          }
+      const sorted = docs.filter(d=>d.data().createdAt&&!d.data().procId?.startsWith('home-care'))
+        .sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+      if(sorted.length){
+        const last = sorted[0].data();
+        const lastBox = document.getElementById('stat-last-proc');
+        const lastName = document.getElementById('stat-last-proc-name');
+        const lastDate = document.getElementById('stat-last-proc-date');
+        if(lastBox&&lastName&&lastDate){
+          lastName.textContent = (last.procIcon||'✦')+' '+(last.procName||'—');
+          const d = last.createdAt?.toDate?.();
+          if(d) lastDate.textContent = d.toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
+          lastBox.style.display='block';
         }
       }
-    }).catch(()=>{});
+    };
+    if(!cacheInvalid(window._cache.diaryTs)){
+      _loadStats(window._cache.diary||[]);
+    } else {
+      F().getDocs(F().query(F().collection(DB(),'diary_entries'),F().where('userId','==',window._user.uid))).then(s=>{
+        window._cache.diary=s.docs; window._cache.diaryTs=Date.now();
+        _loadStats(s.docs);
+      }).catch(()=>{});
+    }
   } catch(e){}
   // Load saved notif date
   const nd = localStorage.getItem('gt_notif_date');
@@ -3215,6 +3330,29 @@ document.addEventListener('click',e=>{
     if(el&&!el.contains(e.target)){const r=el.querySelector('.proc-picker-results');if(r){r.innerHTML='';r.classList.remove('open');}}
   });
 });
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  const swCode=`
+const CACHE='glowtrack-v1';
+const ASSETS=['/glowtrack/','/glowtrack/index.html'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{})));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(fetch(e.request).then(r=>{
+    if(r&&r.status===200&&r.type==='basic'){
+      const rc=r.clone();
+      caches.open(CACHE).then(c=>c.put(e.request,rc));
+    }
+    return r;
+  }).catch(()=>caches.match(e.request)));
+});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url,{scope:'/glowtrack/'}).catch(()=>{});
+}
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){if(document.getElementById('reg-form').style.display!=='none')doRegister();else doLogin();}
 });
