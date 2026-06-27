@@ -598,21 +598,21 @@ textarea.form-input{resize:none}
       <!-- STATS ACCORDION -->
       <div class="acc-section profile-card-section" style="border-bottom:none">
         <div class="acc-header" onclick="toggleAcc(this)" style="padding:0">
-          <span class="pcs-title">📊 Моята статистика</span>
+          <span class="pcs-title" data-t="profileStats">📊 Моята статистика</span>
           <span class="acc-arrow">⌄</span>
         </div>
         <div class="acc-body">
           <div style="display:flex;gap:10px;margin-top:10px">
-            <div class="stat-box"><div class="stat-num" id="stat-diary"><span style="font-size:13px;font-weight:900;color:#b8966a;opacity:.5;letter-spacing:.05em">GT</span></div><div class="stat-lbl">Записа</div></div>
-            <div class="stat-box"><div class="stat-num" id="stat-favs"><span style="font-size:18px">🤍</span></div><div class="stat-lbl">Любими</div></div>
-            <div class="stat-box"><div class="stat-num" id="stat-procs"><span style="font-size:13px;font-weight:900;color:#b8966a;opacity:.5;letter-spacing:.05em">GT</span></div><div class="stat-lbl">Процедури</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-diary"><span style="font-size:13px;font-weight:900;color:#b8966a;opacity:.5;letter-spacing:.05em">GT</span></div><div class="stat-lbl" data-t="statDiary">Записа</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-favs"><span style="font-size:18px">🤍</span></div><div class="stat-lbl" data-t="statFavs">Любими</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-procs"><span style="font-size:13px;font-weight:900;color:#b8966a;opacity:.5;letter-spacing:.05em">GT</span></div><div class="stat-lbl" data-t="statProcs">Процедури</div></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:10px">
-            <div class="stat-box"><div class="stat-num" id="stat-spend" style="font-size:16px">—</div><div class="stat-lbl">Похарчени €</div></div>
-            <div class="stat-box"><div class="stat-num" id="stat-rating" style="font-size:16px">—</div><div class="stat-lbl">Средна оценка</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-spend" style="font-size:16px">—</div><div class="stat-lbl" data-t="statSpend">Похарчени €</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-rating" style="font-size:16px">—</div><div class="stat-lbl" data-t="statRating">Средна оценка</div></div>
           </div>
           <div id="stat-last-proc" style="margin-top:10px;padding:9px 12px;background:var(--goldlt);border-radius:10px;font-size:11.5px;color:var(--ink2);display:none">
-            <span style="color:var(--gold)">✦ Последна процедура:</span> <span id="stat-last-proc-name" style="color:var(--ink);font-weight:600"></span> · <span id="stat-last-proc-date" style="color:var(--ink2)"></span>
+            <span style="color:var(--gold)" data-t="statLastProc">✦ Последна процедура:</span> <span id="stat-last-proc-name" style="color:var(--ink);font-weight:600"></span> · <span id="stat-last-proc-date" style="color:var(--ink2)"></span>
           </div>
         </div>
       </div>
@@ -620,7 +620,7 @@ textarea.form-input{resize:none}
       <!-- FAVORITES ACCORDION -->
       <div class="acc-section profile-card-section" style="border-bottom:none">
         <div class="acc-header" onclick="toggleAcc(this)" style="padding:0">
-          <span class="pcs-title">❤️ Любими процедури</span>
+          <span class="pcs-title" data-t="profileFavs">❤️ Любими процедури</span>
           <span class="acc-arrow">⌄</span>
         </div>
         <div class="acc-body">
@@ -633,7 +633,7 @@ textarea.form-input{resize:none}
       <!-- ДОМАШНА ГРИЖА ACCORDION -->
       <div class="acc-section profile-card-section" style="border-bottom:none">
         <div class="acc-header" onclick="toggleAcc(this)" style="padding:0 0 0 0">
-          <span class="pcs-title">🌿 Домашна грижа</span>
+          <span class="pcs-title" data-t="profileCare">🌿 Домашна грижа</span>
           <span class="acc-arrow">⌄</span>
         </div>
         <div class="acc-body">
@@ -681,7 +681,7 @@ textarea.form-input{resize:none}
       <!-- NOTIFICATIONS ACCORDION -->
       <div class="acc-section profile-card-section" style="border-bottom:none">
         <div class="acc-header" onclick="toggleAcc(this)" style="padding:0">
-          <span class="pcs-title">🔔 Напомняния за процедури</span>
+          <span class="pcs-title" data-t="profileNotifs">🔔 Напомняния за процедури</span>
           <span class="acc-arrow">⌄</span>
         </div>
         <div class="acc-body">
@@ -704,7 +704,7 @@ textarea.form-input{resize:none}
       <!-- FEEDBACK ACCORDION -->
       <div class="acc-section profile-card-section" id="client-feedback-section" style="border-bottom:none">
         <div class="acc-header" onclick="toggleAcc(this)" style="padding:0">
-          <span class="pcs-title">💬 Изпрати предложение</span>
+          <span class="pcs-title" data-t="profileSuggest">💬 Изпрати предложение</span>
           <span class="acc-arrow">⌄</span>
         </div>
         <div class="acc-body">
@@ -936,7 +936,7 @@ window.doRegister=async function(){
 
 window.doLogout=async function(){
   await signOut(auth);
-  window.showToast&&window.showToast('Излязохте');
+  window.showToast&&window.showToast(t('toastLogout'));
 };
 onAuthStateChanged(auth,async user=>{
   if(user){
@@ -1227,6 +1227,67 @@ const T = {
     adminInbox: '📬 Предложения от потребители',
     addClinic: '+ Добави клиника',
     addProduct: '+ Добави продукт',
+    // Stats & Profile sections
+    statDiary: 'Записа',
+    statFavs: 'Любими',
+    statProcs: 'Процедури',
+    statSpend: 'Похарчени €',
+    statRating: 'Средна оценка',
+    statLastProc: 'Последна процедура',
+    profileStats: '📊 Моята статистика',
+    profileFavs: '❤️ Любими процедури',
+    profileCare: '🌿 Домашна грижа',
+    profileNotifs: '🔔 Напомняния за процедури',
+    profileSuggest: '💬 Изпрати предложение',
+    // Pull to refresh / offline
+    pullRefresh: '↓ Издърпай за обновяване',
+    pullRelease: '↑ Отпусни за обновяване',
+    refreshed: '🔄 Обновено!',
+    offline: '⚠️ Няма интернет връзка — работиш офлайн',
+    online: '✅ Връзката е възстановена',
+    // Toasts
+    toastSaved: '✅ Записано!',
+    toastUpdated: '✅ Обновено!',
+    toastDeleted: 'Записът е изтрит',
+    toastCopied: '✅ Линкът е копиран!',
+    toastFavAdd: '❤️ Добавено в Любими!',
+    toastFavRem: 'Премахнато от Любими',
+    toastNeedLogin: 'Влез за да запазиш',
+    toastAddObs: 'Добави поне едно наблюдение',
+    toastErrSave: 'Грешка при запазване',
+    toastErrUpd: 'Грешка при обновяване',
+    toastErrDel: 'Грешка при изтриване',
+    toastLogout: 'Излязохте',
+    toastNotifSaved: '✅ Напомнянето е добавено!',
+    toastNotifUpd: '✅ Напомнянето е обновено!',
+    toastNotifDel: '✅ Напомнянето е изтрито',
+    toastRoutineSaved: '✅ Рутината е запазена!',
+    toastRoutineDiary: '🌙 Рутината е записана в дневника!',
+    toastFbSent: '✅ Предложението е изпратено!',
+    toastFbLogin: 'Влез за да изпратиш',
+    toastFbWrite: 'Напиши предложението си',
+    toastSelectProc: 'Избери процедура',
+    toastSelectDate: 'Избери дата',
+    toastEnterEmail: 'Въведи имейл',
+    toastEnterName: 'Въведи ime',
+    toastRelogin: 'Влез отново и опитай пак',
+    toastErrSend: 'Грешка при изпращане',
+    toastClinicSaved: '✅ Клиниката е запазена',
+    toastProdSaved: '✅ Продуктът е запазен',
+    toastLineSaved: '✅ Редът е запазен',
+    toastNotFound: 'Не е намерено',
+    toastDeleted2: 'Изтрито',
+    toastErr: 'Грешка',
+    // Diary
+    emptyDiary: 'Дневникът е празен',
+    emptyDiarySub: 'Отвори процедура и добави първия си запис',
+    editEntry: '✏️ Редактиране',
+    editBtn: '✏️ Редактирай',
+    deleteEntryBtn: '🗑️ Изтрий',
+    confirmDelete: 'Изтрий този запис?',
+    priceLabel: '💰 Цена',
+    ratingLabel: '⭐ Оценка',
+    noEntries: 'Все още няма записи. Добави наблюдения! 📝',
     // Diary entry labels
     clinicSpecLabel: '🏥 Клиника / Специалист',
     adviceLabel: '👩‍⚕️ Препоръки от специалиста',
@@ -1430,6 +1491,12 @@ function applyLang(){
   const fbKeys = ['fbIdea','fbBug','fbContent'];
   fbtns.forEach((b,i) => { if(fbKeys[i]) b.textContent = t(fbKeys[i]); });
 
+  // Update all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const key=el.getAttribute('data-t');
+    if(key) el.textContent=t(key);
+  });
+
   // Re-render procedures with new language
   renderCats();
   renderProcs();
@@ -1463,7 +1530,7 @@ async function confirmDeleteAccount(){
   try{
     await F().deleteDoc(F().doc(DB(),'users',window._user.uid));
     await F().deleteUser(window._user);
-  }catch(e){showToast('Влез отново и опитай пак');}
+  }catch(e){showToast(t('toastRelogin'));}
 }
 
 // ── NAVIGATION ──
@@ -1651,7 +1718,7 @@ async function openSheet(id){
         window._cache.diaryTs=Date.now();
       }
       const entries=(window._cache.diary||[]).filter(d=>d.data().procId===id).sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
-      diaryEntriesHTML=entries.length?`<div class="diary-entries">${entries.map(d=>renderEntryCard(d)).join('')}</div>`:`<div style="text-align:center;padding:16px;color:var(--ink2);font-size:12px">Все още няма записи. Добави наблюдения! 📝</div>`;
+      diaryEntriesHTML=entries.length?`<div class="diary-entries">${entries.map(d=>renderEntryCard(d)).join('')}</div>`:`<div style="text-align:center;padding:16px;color:var(--ink2);font-size:12px">${t('noEntries')}</div>`;
     }catch(e){}
   }
   const mk=(arr,cls)=>(arr||[]).map(([em,txt])=>`<div class="care-item ${cls}"><span class="care-em">${em}</span><span class="care-txt">${txt}</span></div>`).join('');
@@ -1694,11 +1761,11 @@ async function openSheet(id){
         <div class="form-row"><label class="form-lbl">Лично усещане / Наблюдения</label><textarea class="form-input" id="de-feeling" placeholder="Как се чувстваш, какво забелязваш след процедурата..." rows="2"></textarea></div>
         <div class="form-row"><label class="form-lbl">Препоръчани продукти от специалиста</label><input class="form-input" type="text" id="de-products" placeholder="напр. La Roche-Posay Toleriane · Anthelios SPF50+"></div>
         <div class="form-row">
-          <label class="form-lbl">💰 Цена (€)</label>
+          <label class="form-lbl">${t('priceLabel')} (€)</label>
           <input class="form-input" type="number" id="de-price" placeholder="напр. 50" style="width:120px">
         </div>
         <div class="form-row">
-          <label class="form-lbl">⭐ Оценка</label>
+          <label class="form-lbl">${t('ratingLabel')}</label>
           <div style="display:flex;gap:6px;margin-top:4px" id="de-rating-stars">
             ${[1,2,3,4,5].map(i=>`<span onclick="setRating(${i})" data-star="${i}" style="font-size:24px;cursor:pointer;opacity:.3;transition:opacity .15s">⭐</span>`).join('')}
           </div>
@@ -1732,14 +1799,14 @@ function renderEntryCard(docSnap){
     ${!isRoutineEntry&&(d.clinic||d.specialist)?`<div class="entry-field"><span class="lbl">🏥 Клиника / Специалист</span>${[d.clinic,d.specialist].filter(Boolean).join(' · ')}${d.contact?' · '+d.contact:''}</div>`:''}
     ${d.advice&&!isRoutineEntry?`<div class="entry-field"><span class="lbl">👩‍⚕️ Препоръки от специалиста</span>${d.advice}</div>`:''}
     ${isRoutineEntry&&d.advice?`<div class="entry-field">${d.advice}</div>`:''}
-    ${d.rating>0?`<div class="entry-field"><span class="lbl">⭐ Оценка</span>${'⭐'.repeat(d.rating)}${'☆'.repeat(5-d.rating)}</div>`:''}
-    ${d.price>0?`<div class="entry-field"><span class="lbl">💰 Цена</span>${d.price} €</div>`:''}
+    ${d.rating>0?`<div class="entry-field"><span class="lbl">${t('ratingLabel')}</span>${'⭐'.repeat(d.rating)}${'☆'.repeat(5-d.rating)}</div>`:''}
+    ${d.price>0?`<div class="entry-field"><span class="lbl">${t('priceLabel')}</span>${d.price} €</div>`:''}
     ${d.feeling?`<div class="entry-field"><span class="lbl">💬 Лично усещане</span>${d.feeling}</div>`:''}
     ${photos.length?`<div class="entry-photos">${photos.map(ph=>`<img class="entry-photo" src="${ph}" loading="lazy" onclick="openLightbox('${ph}')">`).join('')}</div>`:''}
     ${d.products&&!isRoutineEntry?`<div class="entry-field" style="margin-top:6px"><span class="lbl">🧴 Препоръчани продукти</span><span class="product-chip">${d.products}</span></div>`:''}
     <div class="entry-actions">
-      <button class="mini-btn" onclick="startEditEntry('${eid}','${currentProcId}')">✏️ Редактирай</button>
-      <button class="mini-btn danger" onclick="deleteEntry('${eid}','${currentProcId}')">🗑️ Изтрий</button>
+      <button class="mini-btn" onclick="startEditEntry('${eid}','${currentProcId}')">${t('editBtn')}</button>
+      <button class="mini-btn danger" onclick="deleteEntry('${eid}','${currentProcId}')">${t('deleteEntryBtn')}</button>
     </div>
   </div>`;
 }
@@ -1755,7 +1822,7 @@ function closeSheet(e){
   let _psy=0,_pulling=false;
   const ptr=document.createElement('div');
   ptr.id='ptr-indicator';
-  ptr.innerHTML='↓ Издърпай за обновяване';
+  ptr.innerHTML=t('pullRefresh');
   ptr.style.cssText='position:fixed;top:-44px;left:0;right:0;z-index:999;text-align:center;padding:12px;font-size:12px;font-weight:600;color:var(--gold);background:var(--goldlt);transition:top .2s;pointer-events:none;letter-spacing:.05em';
   document.body.appendChild(ptr);
   document.addEventListener('touchstart',e=>{
@@ -1767,17 +1834,17 @@ function closeSheet(e){
     if(!_pulling)return;
     const dy=e.touches[0].clientY-_psy;
     if(dy>10) ptr.style.top='0px';
-    if(dy>60) ptr.innerHTML='↑ Отпусни за обновяване';
+    if(dy>60) ptr.innerHTML=t('pullRelease');
   },{passive:true});
   document.addEventListener('touchend',e=>{
     if(!_pulling)return;
     const dy=e.changedTouches[0].clientY-_psy;
     ptr.style.top='-44px';
-    ptr.innerHTML='↓ Издърпай за обновяване';
+    ptr.innerHTML=t('pullRefresh');
     if(dy>80){
       invalidateCache();
       if(typeof loadDiaryTab==='function'&&document.getElementById('page-diary').classList.contains('active'))loadDiaryTab();
-      showToast('🔄 Обновено!');
+      showToast(t('refreshed'));
     }
     _pulling=false;
   },{passive:true});
@@ -1827,7 +1894,7 @@ function removePhoto(i){pendingPhotos.splice(i,1);renderPreviews();}
 
 // ── DIARY SAVE/EDIT/DELETE ──
 async function saveDiaryEntry(procId){
-  if(!window._user){showToast('Влез за да запазиш');return;}
+  if(!window._user){showToast(t('toastNeedLogin'));return;}
   const clinic=document.getElementById('de-clinic')?.value.trim()||'';
   const specialist=document.getElementById('de-specialist')?.value.trim()||'';
   const contact=document.getElementById('de-contact')?.value.trim()||'';
@@ -1836,7 +1903,7 @@ async function saveDiaryEntry(procId){
   const products=document.getElementById('de-products')?.value.trim()||'';
   const price=parseFloat(document.getElementById('de-price')?.value)||0;
   const rating=parseInt(document.getElementById('de-rating')?.value)||0;
-  if(!clinic&&!specialist&&!advice&&!feeling&&!pendingPhotos.length){showToast('Добави поне едно наблюдение');return;}
+  if(!clinic&&!specialist&&!advice&&!feeling&&!pendingPhotos.length){showToast(t('toastAddObs'));return;}
   const btn=document.querySelector('.save-btn');
   btn.disabled=true;btn.textContent='Запазване...';
   const p=PROCS.find(x=>x.id===procId);
@@ -1846,11 +1913,11 @@ async function saveDiaryEntry(procId){
       clinic,specialist,contact,advice,feeling,products,price,rating,photos:pendingPhotos,
       createdAt:F().serverTimestamp()
     });
-    showToast('✅ Записано!');
+    showToast(t('toastSaved'));
     pendingPhotos=[];
     window._cache.diary=null; window._cache.diaryTs=0;
     await openSheet(procId);
-  }catch(e){showToast('Грешка при запазване');btn.disabled=false;btn.textContent='Запази';}
+  }catch(e){showToast(t('toastErrSave'));btn.disabled=false;btn.textContent='Запази';}
 }
 
 function startEditEntry(eid,procId){
@@ -1887,7 +1954,7 @@ function startEditEntry(eid,procId){
         <button class="save-btn" style="max-width:140px;flex:none" onclick="saveRoutineEdit('${eid}','${procId}','${routineType}')">💾 Запази</button>
         <button class="mini-btn" onclick="loadDiaryTab()">Откажи</button>
       </div>`:`
-      <div class="diary-date-lbl">✏️ Редактиране</div>
+      <div class="diary-date-lbl">${t('editEntry')}</div>
       <div class="form-row"><label class="form-lbl">Клиника</label><input class="form-input" id="ee-clinic-${eid}" value="${d.clinic||''}"></div>
       <div class="form-row"><label class="form-lbl">Специалист</label><input class="form-input" id="ee-spec-${eid}" value="${d.specialist||''}"></div>
       <div class="form-row"><label class="form-lbl">Контакти</label><input class="form-input" id="ee-contact-${eid}" value="${d.contact||''}"></div>
@@ -1895,11 +1962,11 @@ function startEditEntry(eid,procId){
       <div class="form-row"><label class="form-lbl">Лично усещане</label><textarea class="form-input" id="ee-feel-${eid}" rows="2">${d.feeling||''}</textarea></div>
       <div class="form-row"><label class="form-lbl">Препоръчани продукти</label><input class="form-input" id="ee-prod-${eid}" value="${d.products||''}"></div>
       <div class="form-row">
-        <label class="form-lbl">💰 Цена (€)</label>
+        <label class="form-lbl">${t('priceLabel')} (€)</label>
         <input class="form-input" type="number" id="ee-price-${eid}" value="${d.price||''}" placeholder="напр. 50" style="width:120px">
       </div>
       <div class="form-row">
-        <label class="form-lbl">⭐ Оценка</label>
+        <label class="form-lbl">${t('ratingLabel')}</label>
         <div style="display:flex;gap:6px;margin-top:4px" id="ee-rating-stars-${eid}">
           ${[1,2,3,4,5].map(i=>`<span onclick="setEditRating('${eid}',${i})" style="font-size:24px;cursor:pointer;opacity:${(d.rating||0)>=i?'1':'.3'};transition:opacity .15s">⭐</span>`).join('')}
         </div>
@@ -1923,13 +1990,13 @@ async function saveEditEntry(eid,procId){
       price:parseFloat(document.getElementById('ee-price-'+eid)?.value)||0,
       rating:parseInt(document.getElementById('ee-rating-'+eid)?.value)||0,
     });
-    showToast('✅ Обновено!'); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);
-  }catch(e){showToast('Грешка при обновяване');}
+    showToast(t('toastUpdated')); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);
+  }catch(e){showToast(t('toastErrUpd'));}
 }
 async function deleteEntry(eid,procId){
-  if(!confirm('Изтрий този запис?'))return;
-  try{await F().deleteDoc(F().doc(DB(),'diary_entries',eid));showToast('Записът е изтрит'); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);}
-  catch(e){showToast('Грешка при изтриване');}
+  if(!confirm(t('confirmDelete')))return;
+  try{await F().deleteDoc(F().doc(DB(),'diary_entries',eid));showToast(t('toastDeleted')); window._cache.diary=null; window._cache.diaryTs=0; await openSheet(procId);}
+  catch(e){showToast(t('toastErrDel'));}
 }
 
 // ── DIARY TAB ──
@@ -1944,7 +2011,7 @@ async function loadDiaryTab(){
       window._cache.diaryTs=Date.now();
     }
     const snap={docs:window._cache.diary||[],empty:!(window._cache.diary||[]).length};
-    if(snap.empty){c.innerHTML='<div class="empty-state"><div class="empty-ic">📖</div><div class="empty-title">Дневникът е празен</div><div class="empty-sub">Отвори процедура и добави първия си запис</div></div>';return;}
+    if(snap.empty){c.innerHTML=`<div class="empty-state"><div class="empty-ic">📖</div><div class="empty-title">${t('emptyDiary')}</div><div class="empty-sub">${t('emptyDiarySub')}</div></div>`;return;}
     const grouped={};
     snap.docs.forEach(d=>{
       const data=d.data();
@@ -2113,19 +2180,19 @@ async function saveClinicAd(){
   const phone=document.getElementById('ac-phone').value.trim();
   const url=document.getElementById('ac-url').value.trim();
   const editId=document.getElementById('ac-edit-id').value;
-  if(!name){showToast('Въведи ime');return;}
+  if(!name){showToast(t('toastEnterName'));return;}
   const data={icon,name,address,phone,url,procIds:acSelProcs,updatedAt:F().serverTimestamp()};
   try{
     if(editId){await F().setDoc(F().doc(DB(),'clinic_ads',editId),data,{merge:true});}
     else{data.createdAt=F().serverTimestamp();await F().addDoc(F().collection(DB(),'clinic_ads'),data);}
-    showToast('✅ Клиниката е запазена');
+    showToast(t('toastClinicSaved'));
     document.getElementById('admin-clinic-form').style.display='none';
     acSelProcs=[];renderAdminChips('clinic');
     document.getElementById('ac-icon').value='';document.getElementById('ac-name').value='';
     document.getElementById('ac-address').value='';document.getElementById('ac-phone').value='';
     document.getElementById('ac-url').value='';document.getElementById('ac-edit-id').value='';
     loadAdminLists();loadClinicsTab();
-  }catch(e){console.error(e);showToast('Грешка');}
+  }catch(e){console.error(e);showToast(t('toastErr'));}
 }
 async function saveProductAd(){
   const icon=document.getElementById('ap-icon').value.trim()||'🧴';
@@ -2133,7 +2200,7 @@ async function saveProductAd(){
   const name=document.getElementById('ap-name').value.trim();
   const desc=document.getElementById('ap-desc').value.trim();
   const editId=document.getElementById('ap-edit-id').value;
-  if(!name){showToast('Въведи ime');return;}
+  if(!name){showToast(t('toastEnterName'));return;}
   const colors=['#e4f0f7','#fdf0f5','#eeeaf8','#e8f0ec','#f0e8dc'];
   const fgs=['#6fa8c8','#d4849a','#9b8ec4','#8fa89a','#b8966a'];
   const ci=Math.floor(Math.random()*colors.length);
@@ -2141,13 +2208,13 @@ async function saveProductAd(){
   try{
     if(editId){await F().setDoc(F().doc(DB(),'product_ads',editId),data,{merge:true});}
     else{data.createdAt=F().serverTimestamp();await F().addDoc(F().collection(DB(),'product_ads'),data);}
-    showToast('✅ Продуктът е запазен');
+    showToast(t('toastProdSaved'));
     document.getElementById('admin-product-form').style.display='none';
     apSelProcs=[];renderAdminChips('product');
     document.getElementById('ap-icon').value='';document.getElementById('ap-brand').value='';
     document.getElementById('ap-name').value='';document.getElementById('ap-desc').value='';document.getElementById('ap-edit-id').value='';
     loadAdminLists();loadProductsTab();
-  }catch(e){console.error(e);showToast('Грешка');}
+  }catch(e){console.error(e);showToast(t('toastErr'));}
 }
 async function loadAdminLists(){
   if(!window._isAdmin)return;
@@ -2159,11 +2226,11 @@ async function loadAdminLists(){
 }
 async function deleteAdminItem(col,id){
   if(!confirm('Изтрий?'))return;
-  try{await F().deleteDoc(F().doc(DB(),col,id));showToast('Изтрито');loadAdminLists();loadClinicsTab();loadProductsTab();
+  try{await F().deleteDoc(F().doc(DB(),col,id));showToast(t('toastDeleted2'));loadAdminLists();loadClinicsTab();loadProductsTab();
     // checkReminders disabled — using notifications tab instead
     // Init notif badge = total count
     const _initNotifs = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
-    updateNotifBadge(_initNotifs.filter(n=>new Date(n.date)>=new Date()).length);}catch(e){showToast('Грешка');}
+    updateNotifBadge(_initNotifs.filter(n=>new Date(n.date)>=new Date()).length);}catch(e){showToast(t('toastErr'));}
 }
 
 // ── LIGHTBOX ──
@@ -2256,8 +2323,8 @@ function setFbType(btn,type){
 }
 async function sendFeedback(){
   const text=document.getElementById('fb-text').value.trim();
-  if(!text){showToast('Напиши предложението си');return;}
-  if(!window._user){showToast('Влез за да изпратиш');return;}
+  if(!text){showToast(t('toastFbWrite'));return;}
+  if(!window._user){showToast(t('toastFbLogin'));return;}
   try{
     await F().addDoc(F().collection(DB(),'feedback'),{
       type:_fbType,
@@ -2269,8 +2336,8 @@ async function sendFeedback(){
       read:false
     });
     document.getElementById('fb-text').value='';
-    showToast('✅ Предложението е изпратено!');
-  }catch(e){showToast('Грешка при изпращане');}
+    showToast(t('toastFbSent'));
+  }catch(e){showToast(t('toastErrSend'));}
 }
 async function loadAdminInbox(){
   try{
@@ -2307,7 +2374,7 @@ function closeForgotModal(){
 }
 async function sendPasswordReset(){
   const email = document.getElementById('forgot-email').value.trim();
-  if(!email){showToast('Въведи имейл');return;}
+  if(!email){showToast(t('toastEnterEmail'));return;}
   const msg = document.getElementById('forgot-message');
   msg.style.display='block';
   msg.textContent='Изпращаме...';
@@ -2370,8 +2437,8 @@ function saveNotifDate(){
   const d = document.getElementById('notif-date').value;
   const procId = document.getElementById('notif-proc')?.value;
   const procName = document.getElementById('notif-proc-search')?.value || '';
-  if(!d){showToast('Избери дата');return;}
-  if(!procId){showToast('Избери процедура');return;}
+  if(!d){showToast(t('toastSelectDate'));return;}
+  if(!procId){showToast(t('toastSelectProc'));return;}
   const time = document.getElementById('notif-time')?.value || '10:00';
   const saved = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
   saved.push({id:'n_'+Date.now(), procId, procName, date:d, time});
@@ -2381,7 +2448,7 @@ function saveNotifDate(){
   const info = document.getElementById('notif-info');
   if(diff >= 0) info.textContent = '✅ ' + procName + ' — ' + new Date(d).toLocaleDateString('bg-BG') + ' в ' + time;
   else info.textContent = '⚠️ Датата е в миналото';
-  showToast('✅ Напомняне запазено!');
+  showToast(t('toastNotifSaved'));
   document.getElementById('notif-date').value = '';
   document.getElementById('notif-proc-search').value = '';
   document.getElementById('notif-proc').value = '';
@@ -2499,7 +2566,7 @@ function addCustomRoutine(){
   // Add to UI
   renderCustomRoutine();
   inp.value = '';
-  showToast('✅ Добавено!');
+  showToast(t('toastFavAdd'));
 }
 
 function renderCustomRoutine(){
@@ -2538,19 +2605,19 @@ function getFavs(){ return JSON.parse(localStorage.getItem('gt_favs')||'[]'); }
 function saveFavs(f){ localStorage.setItem('gt_favs', JSON.stringify(f)); }
 
 function toggleFav(){
-  if(!window._user){showToast('Влез за да запазиш');return;}
+  if(!window._user){showToast(t('toastNeedLogin'));return;}
   const favs = getFavs();
   const id = window.currentProcId;
   const isFav = favs.includes(id);
   if(isFav){
     saveFavs(favs.filter(f=>f!==id));
     document.getElementById('fav-btn').textContent='🤍';
-    showToast('Премахнато от Любими');
+    showToast(t('toastFavRem'));
   } else {
     favs.push(id);
     saveFavs(favs);
     document.getElementById('fav-btn').textContent='❤️';
-    showToast('❤️ Добавено в Любими!');
+    showToast(t('toastFavAdd'));
   }
   loadFavsList();
   updateFavsStat();
@@ -2645,13 +2712,13 @@ function deleteNotif(id){
 
 // ── FAV FROM LIST ──
 function toggleFavFromList(procId, btn){
-  if(!window._user){showToast('Влез за да запазиш');return;}
+  if(!window._user){showToast(t('toastNeedLogin'));return;}
   const favs = getFavs();
   const isFav = favs.includes(procId);
   if(isFav){
     saveFavs(favs.filter(f=>f!==procId));
     btn.textContent='🤍';
-    showToast('Премахнато от Любими');
+    showToast(t('toastFavRem'));
   } else {
     favs.push(procId);
     saveFavs(favs);
@@ -2659,7 +2726,7 @@ function toggleFavFromList(procId, btn){
     btn.classList.remove('heart-pop');
     void btn.offsetWidth;
     btn.classList.add('heart-pop');
-    showToast('❤️ Добавено в Любими!');
+    showToast(t('toastFavAdd'));
   }
   // Update fav btn in open sheet if same proc
   if(window.currentProcId===procId) updateFavBtn(procId);
@@ -2794,7 +2861,7 @@ async function updateRoutineStreak(checked, today){
             createdAt:F().serverTimestamp()
           });
           localStorage.setItem(savedKey, '1');
-          showToast('🌙 Рутината е записана в дневника!');
+          showToast(t('toastRoutineDiary'));
           // Reload diary tab if open
           if(document.getElementById('page-diary')?.classList.contains('active')){
             loadDiaryTab();
@@ -2824,7 +2891,7 @@ function removeFavFromList(procId){
   // Update heart in proc list if visible
   const btn = document.querySelector(`.proc-fav-btn[data-id="${procId}"]`);
   if(btn) btn.textContent = '🤍';
-  showToast('Премахнато от Любими');
+  showToast(t('toastFavRem'));
 }
 
 
@@ -2832,9 +2899,9 @@ function removeFavFromList(procId){
 function editNotif(id){
   const saved = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
   const n = saved.find(x=>x.id===id);
-  if(!n){ showToast('Не е намерено'); return; }
+  if(!n){ showToast(t('toastNotFound')); return; }
   const modal = document.getElementById('edit-notif-modal');
-  if(!modal){ showToast('Грешка'); return; }
+  if(!modal){ showToast(t('toastErr')); return; }
   document.getElementById('edit-notif-id').value = id;
   document.getElementById('edit-notif-proc-search').value = n.procName || '';
   document.getElementById('edit-notif-proc-id').value = n.procId || '';
@@ -2855,15 +2922,15 @@ function saveEditNotif(){
   const procName = document.getElementById('edit-notif-proc-search').value;
   const date = document.getElementById('edit-notif-date').value;
   const time = document.getElementById('edit-notif-time').value;
-  if(!date){showToast('Избери дата');return;}
-  if(!procName){showToast('Избери процедура');return;}
+  if(!date){showToast(t('toastSelectDate'));return;}
+  if(!procName){showToast(t('toastSelectProc'));return;}
   const saved = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
   const idx = saved.findIndex(x=>x.id===id);
   if(idx>-1) saved[idx] = {...saved[idx], procId, procName, date, time};
   localStorage.setItem('gt_notifs', JSON.stringify(saved));
   closeEditNotif();
   loadNotifProcSelector();
-  showToast('✅ Напомнянето е обновено!');
+  showToast(t('toastNotifUpd'));
 }
 
 function filterEditNotifProcs(){
@@ -3058,12 +3125,12 @@ async function saveRoutine(type){
         if(accBody){ accBody.classList.remove('open'); const arr=accBody.previousElementSibling?.querySelector('.acc-arrow'); if(arr) arr.classList.remove('open'); }
       } catch(e){}
     } else {
-      showToast('✅ Рутината е запазена!');
+      showToast(t('toastRoutineSaved'));
       const accBody = document.getElementById('routine-acc-body') || document.querySelector('.acc-body.open');
       if(accBody){ accBody.classList.remove('open'); const arr=accBody.previousElementSibling?.querySelector('.acc-arrow'); if(arr) arr.classList.remove('open'); }
     }
   } else {
-    showToast('✅ Запазено!');
+    showToast(t('toastSaved'));
   }
 }
 
@@ -3154,7 +3221,7 @@ function moveDiaryGroup(pid, dir){
     .map(el=>el.dataset.pid)
     .filter(p=>!pinned.includes(p));
   localStorage.setItem('gt_diary_order', JSON.stringify(newOrder));
-  showToast('✅ Редът е запазен');
+  showToast(t('toastLineSaved'));
 }
 
 
@@ -3183,9 +3250,9 @@ async function saveRoutineEdit(eid, procId, type){
       advice: checked.length ? 'Стъпки: '+checked.join(', ') : '',
       feeling: feeling,
     });
-    showToast('✅ Обновено!');
+    showToast(t('toastUpdated'));
     loadDiaryTab();
-  }catch(e){showToast('Грешка при обновяване');}
+  }catch(e){showToast(t('toastErrUpd'));}
 }
 
 
@@ -3206,7 +3273,7 @@ function deleteNotifFromPage(id){
   localStorage.setItem('gt_notifs', JSON.stringify(saved));
   updateNotifBadge(saved.filter(n=>new Date(n.date)>=new Date()).length);
   loadNotifsPage();
-  showToast('✅ Напомнянето е изтрито');
+  showToast(t('toastNotifDel'));
 }
 
 
@@ -3297,8 +3364,8 @@ async function loadAdminStats(){
     statsEl.innerHTML = `
       <div style="display:flex;gap:10px;margin-bottom:14px">
         <div class="stat-box"><div class="stat-num" style="font-size:28px">${activeUsers.length}</div><div class="stat-lbl">Активни</div></div>
-        <div class="stat-box"><div class="stat-num" style="font-size:28px">${diarySnap.size}</div><div class="stat-lbl">Записа</div></div>
-        <div class="stat-box"><div class="stat-num" style="font-size:28px">${Object.keys(procCount).length}</div><div class="stat-lbl">Процедури</div></div>
+        <div class="stat-box"><div class="stat-num" style="font-size:28px">${diarySnap.size}</div><div class="stat-lbl" data-t="statDiary">Записа</div></div>
+        <div class="stat-box"><div class="stat-num" style="font-size:28px">${Object.keys(procCount).length}</div><div class="stat-lbl" data-t="statProcs">Процедури</div></div>
       </div>
       <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">ТОП ПРОЦЕДУРИ</div>
       ${topProcs}`;
@@ -3315,7 +3382,7 @@ function shareProc(){
       .catch(()=>{});
   } else {
     navigator.clipboard?.writeText('https://neshovska.github.io/glowtrack/').then(()=>{
-      showToast('✅ Линкът е копиран!');
+      showToast(t('toastCopied'));
     });
   }
 }
@@ -3339,7 +3406,7 @@ function setEditRating(eid,val){
 // ── INTERVAL CALCULATOR ──
 function calcNextDate(){
   const lastDate = document.getElementById('calc-last-date').value;
-  if(!lastDate){showToast('Избери дата');return;}
+  if(!lastDate){showToast(t('toastSelectDate'));return;}
   const proc = window.PROCS?.find(p=>p.id===window.currentProcId);
   const interval = proc?.interval || '';
   const result = document.getElementById('calc-result');
@@ -3375,7 +3442,7 @@ function suggestReminder(lastDate, minDays, maxDays){
   localStorage.setItem('gt_notifs', JSON.stringify(saved));
   const upcoming = saved.filter(n=>new Date(n.date)>=new Date()).length;
   updateNotifBadge(upcoming);
-  showToast('✅ Напомнянето е добавено!');
+  showToast(t('toastNotifSaved'));
   document.getElementById('calc-result').querySelector('button')?.remove();
 }
 
@@ -3409,9 +3476,9 @@ document.addEventListener('click',e=>{
 });
 
 // ── OFFLINE DETECTION ──
-window.addEventListener('online', ()=>showToast('✅ Връзката е възстановена'));
-window.addEventListener('offline', ()=>showToast('⚠️ Няма интернет връзка — работиш офлайн', 4000));
-if(!navigator.onLine) showToast('⚠️ Няма интернет връзка', 4000);
+window.addEventListener('online', ()=>showToast(t('online')));
+window.addEventListener('offline', ()=>showToast(t('offline'), 4000));
+if(!navigator.onLine) showToast(t('offline'), 4000);
 
 // ── SERVICE WORKER ──
 if('serviceWorker' in navigator){
