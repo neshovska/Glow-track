@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-<script>
-window.onerror=function(m,s,l){console.error('Error:',m,'Line:',l);return false;};
-window.addEventListener('unhandledrejection',function(e){console.error('Rejection:',e.reason);});
-</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,8 +13,8 @@ window.addEventListener('unhandledrejection',function(e){console.error('Rejectio
 <meta property="og:title" content="GlowTrack · Know your glow.">
 <meta property="og:description" content="80+ козметични процедури, личен дневник и напомняния за следваща сесия.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://neshovska.github.io/glowtrack/">
-<meta property="og:image" content="https://neshovska.github.io/glowtrack/og-image.png">
+<meta property="og:url" content="https://glowtrack.eu/">
+<meta property="og:image" content="https://glowtrack.eu/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="GlowTrack · Know your glow.">
 <meta name="twitter:description" content="80+ козметични процедури, личен дневник и напомняния.">
@@ -929,102 +926,78 @@ textarea.form-input{resize:none}
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,updatePassword,deleteUser}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-const fb=initializeApp({apiKey:"AIzaSyAssUyJ9xhc9JfDbuKWjM9GLsqdlnrkFa8",authDomain:"after-care-treatment.firebaseapp.com",projectId:"after-care-treatment",storageBucket:"after-care-treatment.firebasestorage.app",messagingSenderId:"771928458805",appId:"1:771928458805:web:770106c907426147d1137c"});
-const auth=getAuth(fb);const db=getFirestore(fb);
-window._auth=auth;window._db=db;
-window._f={createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile,updatePassword,deleteUser,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp};
-window.doLogin=async function(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  if(!email||!pass){window.showAuthError(t('fillAllFields'));return;}
-  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='...';
-  try{await signInWithEmailAndPassword(auth,email,pass);}
-  catch(e){window.showAuthError(t('wrongCredentials'));}
-  finally{btn.disabled=false;btn.textContent='Влез';}
-};
-window.doRegister=async function(){
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!pass){window.showAuthError(t('fillAllFields'));return;}
-  if(pass.length<6){window.showAuthError('Паролата трябва да е поне 6 символа');return;}
-  const btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='...';
-  try{
-    const cred=await createUserWithEmailAndPassword(auth,email,pass);
-    await updateProfile(cred.user,{displayName:name});
-    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,name,email,createdAt:serverTimestamp()});
-  }catch(e){window.showAuthError(e.code==='auth/email-already-in-use'?t('emailExists'):t('registerError'));}
-  finally{btn.disabled=false;btn.textContent='Създай акаунт';}
-};
-window.doLogout=async function(){await signOut(auth);window.showToast&&window.showToast(t('toastLogout'));};
-onAuthStateChanged(auth,async user=>{
-  if(user){
-    window._user=user;window._isAdmin=(user.email==='neshovska@yahoo.com');
-    const loginSplash=document.getElementById('splash');const loginLogo=document.getElementById('splash-logo');
-    if(loginSplash){loginSplash.style.display='flex';loginSplash.style.opacity='1';}
-    if(loginLogo){loginLogo.style.transform='scale(0.3)';loginLogo.style.opacity='0';}
-    setTimeout(()=>{if(loginLogo){loginLogo.style.transform='scale(1)';loginLogo.style.opacity='1';}},100);
-    setTimeout(()=>{document.getElementById('auth-screen').classList.add('hidden');document.getElementById('app').classList.add('show');},1800);
-    setTimeout(()=>{if(loginSplash){loginSplash.style.opacity='0';setTimeout(()=>{loginSplash.style.display='none';},600);}},2000);
-    document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
-    document.getElementById('prof-email').textContent=user.email;
-    document.getElementById('topbar-right').textContent='';
-    const _name=user.displayName||user.email.split('@')[0]||'';
-    const _parts=_name.trim().split(/\s+/);
-    const _ini=(_parts[0]?_parts[0][0]:'')+((_parts.length>1&&_parts[_parts.length-1])?_parts[_parts.length-1][0]:'');
-    const _iniUp=_ini.toUpperCase();
-    const _navSvg=document.getElementById('nav-avatar');const _profSvg=document.getElementById('profile-av-wrap');
-    if(_navSvg)_navSvg.textContent=_iniUp;if(_profSvg)_profSvg.textContent=_iniUp;
-    const _navBtn=document.getElementById('nav-profile-btn');
-    if(_navBtn){const svgEls=_navBtn.querySelectorAll('circle,path,text');svgEls.forEach(el=>{if(el.tagName!=='text'){el.setAttribute('stroke','#b8966a');el.setAttribute('fill',el.getAttribute('fill')?'rgba(184,150,106,.25)':'none');}else{el.setAttribute('fill','#b8966a');}});}
-    loadFavsList();updateFavsStat();loadNotifProcSelector();
-    try{
-      const uSnap=await getDoc(doc(db,'users',user.uid));
-      if(uSnap.exists()&&uSnap.data().notifs){
-        const fbNotifs=uSnap.data().notifs;const localNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');
-        const merged=[...localNotifs];fbNotifs.forEach(fn=>{if(!merged.find(ln=>ln.id===fn.id))merged.push(fn);});
-        localStorage.setItem('gt_notifs',JSON.stringify(merged));
-      }
-    }catch(e){}
-    try{
-      const uSnap2=await getDoc(doc(db,'users',user.uid));
-      if(uSnap2.exists()&&uSnap2.data().favs){
-        const fbFavs=uSnap2.data().favs;const localFavs=getFavs();
-        const merged=[...new Set([...localFavs,...fbFavs])];
-        if(merged.length!==localFavs.length)saveFavs(merged);
-      }
-    }catch(e){}
-    loadHomeCare();
-    if(window._isAdmin){
-      document.getElementById('admin-panel').style.display='block';
-      loadAdminLists();loadAdminInbox();
-      document.querySelectorAll('.nb-soon').forEach(btn=>{btn.style.opacity='1';btn.style.cursor='pointer';});
-      const nbtns=document.querySelectorAll('.nb-soon');
-      if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};const ni0=nbtns[0].querySelector('.nl');if(ni0)ni0.textContent='Клиники';}
-      if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};const ni1=nbtns[1].querySelector('.nl');if(ni1)ni1.textContent='Продукти';}
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" crossorigin="anonymous" onerror="window._fbFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" crossorigin="anonymous"></script>
+<script>
+if(typeof firebase !== 'undefined'){
+  const fb=firebase.initializeApp({apiKey:"AIzaSyAssUyJ9xhc9JfDbuKWjM9GLsqdlnrkFa8",authDomain:"after-care-treatment.firebaseapp.com",projectId:"after-care-treatment",storageBucket:"after-care-treatment.firebasestorage.app",messagingSenderId:"771928458805",appId:"1:771928458805:web:770106c907426147d1137c"});
+  const auth=fb.auth();const db=fb.firestore();
+  window._auth=auth;window._db=db;
+  window._f={
+    createUserWithEmailAndPassword:(a,e,p)=>a.createUserWithEmailAndPassword(e,p),
+    signInWithEmailAndPassword:(a,e,p)=>a.signInWithEmailAndPassword(e,p),
+    signOut:(a)=>a.signOut(),
+    updateProfile:(u,d)=>u.updateProfile(d),
+    updatePassword:(u,p)=>u.updatePassword(p),
+    deleteUser:(u)=>u.delete(),
+    collection:(db,col)=>db.collection(col),
+    doc:(db,col,id)=>id?db.collection(col).doc(id):db.collection(col).doc(),
+    addDoc:(ref,data)=>ref.add(data),
+    getDocs:(q)=>q.get(),
+    getDoc:(ref)=>ref.get(),
+    setDoc:(ref,data,opts)=>opts&&opts.merge?ref.set(data,{merge:true}):ref.set(data),
+    updateDoc:(ref,data)=>ref.update(data),
+    deleteDoc:(ref)=>ref.delete(),
+    query:(col,...cs)=>{let q=col;cs.forEach(c2=>{if(c2&&c2._t==='w')q=q.where(c2._f,c2._o,c2._v);});return q;},
+    where:(f,o,v)=>({_t:'w',_f:f,_o:o,_v:v}),
+    serverTimestamp:()=>firebase.firestore.FieldValue.serverTimestamp()
+  };
+  window.doLogin=async function(){const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;if(!email||!pass){window.showAuthError(t('fillAllFields'));return;}const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='...';try{await auth.signInWithEmailAndPassword(email,pass);}catch(e){window.showAuthError(t('wrongCredentials'));}finally{btn.disabled=false;btn.textContent='Влез';}};
+  window.doRegister=async function(){const name=document.getElementById('reg-name').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;if(!name||!email||!pass){window.showAuthError(t('fillAllFields'));return;}if(pass.length<6){window.showAuthError('Паролата трябва да е поне 6 символа');return;}const btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='...';try{const cred=await auth.createUserWithEmailAndPassword(email,pass);await cred.user.updateProfile({displayName:name});await db.collection('users').doc(cred.user.uid).set({uid:cred.user.uid,name,email,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){window.showAuthError(e.code==='auth/email-already-in-use'?t('emailExists'):t('registerError'));}finally{btn.disabled=false;btn.textContent='Създай акаунт';}};
+  window.doLogout=async function(){await auth.signOut();window.showToast&&window.showToast(t('toastLogout'));};
+  auth.onAuthStateChanged(async function(user){
+    if(user){
+      window._user=user;window._isAdmin=(user.email==='neshovska@yahoo.com');
+      const loginSplash=document.getElementById('splash');const loginLogo=document.getElementById('splash-logo');
+      if(loginSplash){loginSplash.style.display='flex';loginSplash.style.opacity='1';}
+      if(loginLogo){loginLogo.style.transform='scale(0.3)';loginLogo.style.opacity='0';}
+      setTimeout(function(){if(loginLogo){loginLogo.style.transform='scale(1)';loginLogo.style.opacity='1';}},100);
+      setTimeout(function(){document.getElementById('auth-screen').classList.add('hidden');document.getElementById('app').classList.add('show');},1800);
+      setTimeout(function(){if(loginSplash){loginSplash.style.opacity='0';setTimeout(function(){loginSplash.style.display='none';},600);}},2000);
+      document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
+      document.getElementById('prof-email').textContent=user.email;
+      document.getElementById('topbar-right').textContent='';
+      var _name=user.displayName||user.email.split('@')[0]||'';
+      var _parts=_name.trim().split(/\s+/);
+      var _ini=(_parts[0]?_parts[0][0]:'')+((_parts.length>1&&_parts[_parts.length-1])?_parts[_parts.length-1][0]:'');
+      var _iniUp=_ini.toUpperCase();
+      var _navSvg=document.getElementById('nav-avatar');var _profSvg=document.getElementById('profile-av-wrap');
+      if(_navSvg)_navSvg.textContent=_iniUp;if(_profSvg)_profSvg.textContent=_iniUp;
+      var _navBtn=document.getElementById('nav-profile-btn');
+      if(_navBtn){var svgEls=_navBtn.querySelectorAll('circle,path,text');svgEls.forEach(function(el){if(el.tagName!=='text'){el.setAttribute('stroke','#b8966a');el.setAttribute('fill',el.getAttribute('fill')?'rgba(184,150,106,.25)':'none');}else{el.setAttribute('fill','#b8966a');}});}
+      if(typeof loadFavsList==='function')loadFavsList();
+      if(typeof updateFavsStat==='function')updateFavsStat();
+      if(typeof loadNotifProcSelector==='function')loadNotifProcSelector();
+      try{var uSnap=await db.collection('users').doc(user.uid).get();if(uSnap.exists&&uSnap.data()&&uSnap.data().notifs){var fbNotifs=uSnap.data().notifs;var localNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');var merged=[].concat(localNotifs);fbNotifs.forEach(function(fn){if(!merged.find(function(ln){return ln.id===fn.id;}))merged.push(fn);});localStorage.setItem('gt_notifs',JSON.stringify(merged));}}catch(e){}
+      try{var uSnap2=await db.collection('users').doc(user.uid).get();if(uSnap2.exists&&uSnap2.data()&&uSnap2.data().favs){var fbFavs=uSnap2.data().favs;var localFavs=typeof getFavs==='function'?getFavs():[];var merged2=[].concat([...new Set([].concat(localFavs,fbFavs))]);if(merged2.length!==localFavs.length&&typeof saveFavs==='function')saveFavs(merged2);}}catch(e){}
+      if(typeof loadHomeCare==='function')loadHomeCare();
+      if(window._isAdmin){var ap=document.getElementById('admin-panel');if(ap)ap.style.display='block';if(typeof loadAdminLists==='function'){loadAdminLists();loadAdminInbox();}document.querySelectorAll('.nb-soon').forEach(function(btn){btn.style.opacity='1';btn.style.cursor='pointer';});var nbtns=document.querySelectorAll('.nb-soon');if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};var ni0=nbtns[0].querySelector('.nl');if(ni0)ni0.textContent='Клиники';}if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};var ni1=nbtns[1].querySelector('.nl');if(ni1)ni1.textContent='Продукти';}}
+      if(typeof loadClinicsTab==='function')loadClinicsTab();
+      if(typeof loadProductsTab==='function')loadProductsTab();
+      if(!window._isAdmin&&typeof checkOnboarding==='function')checkOnboarding();
+      var _lastPage=localStorage.getItem('gt_last_page');
+      if(_lastPage&&_lastPage!=='procs'){try{var _pageMap={notifs:true,diary:true,profile:true,clinics:true,products:true};if(_pageMap[_lastPage]&&typeof goPage==='function')goPage(_lastPage,null);}catch(e){}}
+      var _initNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');
+      if(typeof updateNotifBadge==='function')updateNotifBadge(_initNotifs.filter(function(n){return new Date(n.date)>=new Date();}).length);
+      db.collection('users').doc(user.uid).get().then(function(d){if(d.exists&&d.data()&&d.data().lang){window._lang=d.data().lang;localStorage.setItem('gt_lang',window._lang);}if(typeof applyLang==='function')applyLang();else window._pendingLang=true;}).catch(function(){if(typeof applyLang==='function')applyLang();else window._pendingLang=true;});
+    }else{
+      window._user=null;window._isAdmin=false;
+      document.getElementById('auth-screen').classList.remove('hidden');
+      document.getElementById('app').classList.remove('show');
     }
-    loadClinicsTab();loadProductsTab();
-    if(!window._isAdmin)checkOnboarding();
-    const _lastPage=localStorage.getItem('gt_last_page');
-    if(_lastPage&&_lastPage!=='procs'){
-      try{const _pageMap={notifs:true,diary:true,profile:true,clinics:true,products:true};if(_pageMap[_lastPage])goPage(_lastPage,null);}catch(e){}
-    }
-    const _initNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');
-    updateNotifBadge(_initNotifs.filter(n=>new Date(n.date)>=new Date()).length);
-    getDoc(doc(db,'users',user.uid)).then(d=>{
-      if(d.exists()&&d.data().lang){window._lang=d.data().lang;localStorage.setItem('gt_lang',window._lang);}
-      if(typeof applyLang==='function')applyLang();else window._pendingLang=true;
-    }).catch(()=>{if(typeof applyLang==='function')applyLang();else window._pendingLang=true;});
-  }else{
-    window._user=null;window._isAdmin=false;
-    document.getElementById('auth-screen').classList.remove('hidden');
-    document.getElementById('app').classList.remove('show');
-  }
-});
+  });
+}
 </script>
 
 
@@ -3860,10 +3833,10 @@ function shareProc(){
   const title = document.getElementById('sh-title')?.textContent || 'GlowTrack';
   const text = 'Разгледай процедурата: ' + title + ' в GlowTrack';
   if(navigator.share){
-    navigator.share({title: 'GlowTrack · '+title, text, url: 'https://neshovska.github.io/glowtrack/'})
+    navigator.share({title: 'GlowTrack · '+title, text, url: 'https://glowtrack.eu/'})
       .catch(()=>{});
   } else {
-    navigator.clipboard?.writeText('https://neshovska.github.io/glowtrack/').then(()=>{
+    navigator.clipboard?.writeText('https://glowtrack.eu/').then(()=>{
       showToast(t('toastCopied'));
     });
   }
