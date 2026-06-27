@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+<script>
+// Detect in-app browser (Instagram, Facebook, TikTok etc)
+(function(){
+  var ua = navigator.userAgent || '';
+  var isInApp = /Instagram|FBAN|FBAV|Twitter|Line\/|Musical.ly|TikTok/i.test(ua);
+  if(isInApp){
+    document.addEventListener('DOMContentLoaded', function(){
+      var banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b8966a;color:#fff;text-align:center;padding:12px 16px;font-size:14px;font-family:sans-serif;';
+      banner.innerHTML = '⚠️ За най-добро изживяване <strong>отвори в Safari</strong> — натисни ··· → Отвори в браузъра';
+      document.body.appendChild(banner);
+    });
+  }
+})();
+
+window.onerror = function(msg, src, line, col, err) {
+  console.error('Error:', msg, 'Line:', line);
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Promise rejection:', e.reason);
+});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -509,23 +532,23 @@ textarea.form-input{resize:none}
   <div class="topbar"><div class="topbar-inner" style="position:relative;flex-direction:column;align-items:center;gap:1px;padding:10px 0 8px"><div class="logo">Glow<span>Track</span></div><div style="font-size:10px;color:var(--gold);letter-spacing:.15em;font-family:'DM Sans',sans-serif;font-weight:400;opacity:.8">Know your glow.</div><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px"><button id="dark-btn" onclick="toggleDarkMode()" style="background:none;border:1.5px solid rgba(184,150,106,.35);border-radius:20px;padding:3px 9px;font-size:13px;cursor:pointer;line-height:1">☀️</button><button class="lang-btn" id="app-lang-btn" onclick="toggleLang()">EN</button></div></div><div id="topbar-right" style="display:none"></div></div>
   <div class="page active" id="page-procs">
     <div class="page-hdr"><div class="page-hdr-title">Процедури</div><div class="page-hdr-sub">Пълна енциклопедия — намери, научи, проследи</div></div>
-    <div class="search-wrap"><div class="search-box" style="position:relative"><span class="search-icon">🔍</span><input class="search-input" id="proc-search" aria-label="Търси процедура" role="searchbox" placeholder="Търси процедура..." oninput="debounceSearch()" onfocus="showSuggestions()" onblur="setTimeout(hideSuggestions,200)" autocomplete="off"><button id="search-clear" onclick="clearSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;color:var(--ink2);cursor:pointer;padding:4px;line-height:1">×</button><div id="search-suggestions" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--goldlt);border-radius:12px;box-shadow:0 4px 16px rgba(26,26,46,.1);z-index:100;overflow:hidden"></div></div></div>
+    <div class="search-wrap"><div class="search-box" style="position:relative"><span class="search-icon">🔍</span><input class="search-input" id="proc-search" aria-label="Търси процедура" role="searchbox" placeholder="${t('searchProcs')}" oninput="debounceSearch()" onfocus="showSuggestions()" onblur="setTimeout(hideSuggestions,200)" autocomplete="off"><button id="search-clear" onclick="clearSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;color:var(--ink2);cursor:pointer;padding:4px;line-height:1">×</button><div id="search-suggestions" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--goldlt);border-radius:12px;box-shadow:0 4px 16px rgba(26,26,46,.1);z-index:100;overflow:hidden"></div></div></div>
     <div class="cats" id="cats-bar"></div>
     <div class="proc-list" id="proc-list"></div>
     <div id="no-results" style="display:none;text-align:center;padding:30px;color:var(--ink2);font-size:13px">Няма намерени процедури</div>
   </div>
   <div class="page" id="page-diary">
-    <div class="page-hdr"><div class="page-hdr-title">Моят <em>дневник</em></div><div class="page-hdr-sub">Лична история на процедурите ти</div></div>
+    <div class="page-hdr"><div class="page-hdr-title">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div><div class="page-hdr-sub">Лична история на процедурите ти</div></div>
     <div id="diary-tab-content"></div>
   </div>
   <div class="page" id="page-clinics">
     <div class="page-hdr"><div class="page-hdr-title"><em>Клиники</em></div><div class="page-hdr-sub">Партньорски клиники</div></div>
-    <div class="search-wrap"><div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="clinic-search" placeholder="Търси клиника или процедура..." oninput="filterClinics()"></div></div>
+    <div class="search-wrap"><div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="clinic-search" placeholder="${t('searchClinics')}" oninput="filterClinics()"></div></div>
     <div class="clinics-list" id="clinics-list"></div>
   </div>
   <div class="page" id="page-products">
     <div class="page-hdr"><div class="page-hdr-title">Козметика & <em>грижа</em></div><div class="page-hdr-sub">Препоръчани продукти за след процедура</div></div>
-    <div class="search-wrap"><div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="prod-search" placeholder="Търси продукт или процедура..." oninput="filterProducts()"></div></div>
+    <div class="search-wrap"><div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="prod-search" placeholder="${t('searchProducts')}" oninput="filterProducts()"></div></div>
     <div class="products-tab-list" id="products-tab-list"></div>
   </div>
   <div class="page" id="page-notifs">
@@ -607,7 +630,7 @@ textarea.form-input{resize:none}
             <input class="admin-input" type="text" id="ap-icon" placeholder="🧴 Икона">
             <input class="admin-input" type="text" id="ap-brand" placeholder="Марка">
             <input class="admin-input" type="text" id="ap-name" placeholder="Ime на продукта *">
-            <textarea class="admin-input" id="ap-desc" placeholder="Описание..." style="resize:none;min-height:55px"></textarea>
+            <textarea class="admin-input" id="ap-desc" placeholder="${t('descPh')}" style="resize:none;min-height:55px"></textarea>
             <div style="font-size:11px;color:var(--ink2)">Процедури:</div>
             <div class="proc-picker" id="admin-product-picker">
               <input class="admin-input" type="text" id="ap-proc-search" placeholder="🔍 Търси процедури..." oninput="filterAdminPicker('product')">
@@ -745,7 +768,7 @@ textarea.form-input{resize:none}
           <button class="fb-type-btn" data-type="bug" onclick="setFbType(this,'bug')">🐛 Грешка</button>
           <button class="fb-type-btn" data-type="content" onclick="setFbType(this,'content')">📝 Съдържание</button>
         </div>
-        <textarea class="form-input" id="fb-text" placeholder="Опиши предложението си..." rows="3" style="font-size:13px"></textarea>
+        <textarea class="form-input" id="fb-text" placeholder="${t('suggestionPh')}" rows="3" style="font-size:13px"></textarea>
         <button class="admin-btn" style="margin-top:8px;width:100%" onclick="sendFeedback()">Изпрати ✦</button>
         </div>
       </div>
@@ -898,7 +921,7 @@ textarea.form-input{resize:none}
       <div style="font-size:18px;font-weight:700;color:var(--ink1);margin-bottom:6px">Забравена парола</div>
       <div style="font-size:12px;color:var(--ink2)">Въведи имейла си и ще получиш линк за reset</div>
     </div>
-    <input class="auth-input" id="forgot-email" type="email" placeholder="Твоят имейл" style="margin-bottom:12px">
+    <input class="auth-input" id="forgot-email" type="email" placeholder="${t('emailPh2')}" style="margin-bottom:12px">
     <button class="auth-btn" onclick="sendPasswordReset()" style="margin-bottom:8px">Изпрати линк</button>
     <button style="width:100%;padding:11px;border:1px solid var(--goldlt);border-radius:10px;background:none;color:var(--ink2);cursor:pointer;font-family:inherit;font-size:13px" onclick="closeForgotModal()">Отмени</button>
     <div id="forgot-message" style="margin-top:12px;font-size:12px;color:var(--sage);text-align:center;display:none"></div>
@@ -918,160 +941,193 @@ textarea.form-input{resize:none}
     <div class="ai-messages" id="ai-messages"></div>
     <div class="ai-suggestions" id="ai-suggestions"></div>
     <div class="ai-input-row">
-      <input class="ai-input" id="ai-input" type="text" placeholder="Задай въпрос..." onkeydown="if(event.key==='Enter')sendAiMsg()">
+      <input class="ai-input" id="ai-input" type="text" placeholder="${t('aiQuestionPh')}" onkeydown="if(event.key==='Enter')sendAiMsg()">
       <button class="ai-send-btn" id="ai-send-btn" onclick="sendAiMsg()">›</button>
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,updatePassword,deleteUser}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-const fb=initializeApp({apiKey:"AIzaSyAssUyJ9xhc9JfDbuKWjM9GLsqdlnrkFa8",authDomain:"after-care-treatment.firebaseapp.com",projectId:"after-care-treatment",storageBucket:"after-care-treatment.firebasestorage.app",messagingSenderId:"771928458805",appId:"1:771928458805:web:770106c907426147d1137c"});
-const auth=getAuth(fb);const db=getFirestore(fb);
-window._auth=auth;window._db=db;
-window._f={createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile,deleteUser,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,where,serverTimestamp};
+<script>
+// ── FIREBASE DYNAMIC LOADER ──
+(function(){
+  var FB_VER = '10.14.1';
+  var FB_BASE = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
+  var FB_CONFIG = {
+    apiKey:"AIzaSyAssUyJ9xhc9JfDbuKWjM9GLsqdlnrkFa8",
+    authDomain:"after-care-treatment.firebaseapp.com",
+    projectId:"after-care-treatment",
+    storageBucket:"after-care-treatment.firebasestorage.app",
+    messagingSenderId:"771928458805",
+    appId:"1:771928458805:web:770106c907426147d1137c"
+  };
 
-// Auth functions defined HERE inside module scope - direct access to imports
-window.doLogin=async function(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  if(!email||!pass){window.showAuthError('Попълни всички полета');return;}
-  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='...';
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-  }catch(e){
-    console.error('LOGIN ERR',e.code,e.message);
-    window.showAuthError('Грешен имейл или парола');
-  }finally{btn.disabled=false;btn.textContent='Влез';}
-};
-
-window.doRegister=async function(){
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!pass){window.showAuthError('Попълни всички полета');return;}
-  if(pass.length<6){window.showAuthError('Паролата трябва да е поне 6 символа');return;}
-  const btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='...';
-  try{
-    const cred=await createUserWithEmailAndPassword(auth,email,pass);
-    await updateProfile(cred.user,{displayName:name});
-    await setDoc(doc(db,'users',cred.user.uid),{uid:cred.user.uid,name,email,createdAt:serverTimestamp()});
-  }catch(e){
-    console.error('REG ERR',e.code,e.message);
-    window.showAuthError(e.code==='auth/email-already-in-use'?'Имейлът вече е регистриран':'Грешка при регистрация');
-  }finally{btn.disabled=false;btn.textContent='Създай акаунт';}
-};
-
-window.doLogout=async function(){
-  await signOut(auth);
-  window.showToast&&window.showToast(t('toastLogout'));
-};
-onAuthStateChanged(auth,async user=>{
-  if(user){
-    window._user=user;
-    window._isAdmin=(user.email==='neshovska@yahoo.com');
-    // Login splash animation
-    const loginSplash = document.getElementById('splash');
-    const loginLogo = document.getElementById('splash-logo');
-    if(loginSplash) loginSplash.style.display = 'flex';
-    if(loginSplash) loginSplash.style.opacity = '1';
-    if(loginLogo){ loginLogo.style.transform = 'scale(0.3)';
-    loginLogo.style.opacity = '0';}
-    setTimeout(()=>{
-      loginLogo.style.transform = 'scale(1)';
-      loginLogo.style.opacity = '1';
-    }, 100);
-    setTimeout(()=>{
-      document.getElementById('auth-screen').classList.add('hidden');
-      document.getElementById('app').classList.add('show');
-    }, 1800);
-    setTimeout(()=>{
-      loginSplash.style.opacity = '0';
-      setTimeout(()=>{ loginSplash.style.display = 'none'; }, 600);
-    }, 2000);
-    document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
-    document.getElementById('prof-email').textContent=user.email;
-    document.getElementById('topbar-right').textContent='';
-    const _name=user.displayName||user.email.split('@')[0]||'';
-    const _parts=_name.trim().split(/\s+/);
-    const _ini=(_parts[0]?_parts[0][0]:'')+((_parts.length>1&&_parts[_parts.length-1])?_parts[_parts.length-1][0]:'');
-    const _iniUp=_ini.toUpperCase();
-    const _navSvg=document.getElementById('nav-avatar');
-    const _profSvg=document.getElementById('profile-av-wrap');
-    if(_navSvg)_navSvg.textContent=_iniUp;
-    if(_profSvg)_profSvg.textContent=_iniUp;
-    const _navBtn=document.getElementById('nav-profile-btn');
-    if(_navBtn){const svgEls=_navBtn.querySelectorAll('circle,path,text');svgEls.forEach(el=>{if(el.tagName!=='text'){el.setAttribute('stroke','#b8966a');el.setAttribute('fill',el.getAttribute('fill')?'rgba(184,150,106,.25)':'none');}else{el.setAttribute('fill','#b8966a');}});}
-    loadFavsList();
-  updateFavsStat();
-  loadNotifProcSelector();
-  // Restore notifs from Firebase (cross-device sync)
-  try{
-    const uSnap = await F().getDoc(F().doc(DB(),'users',window._user.uid));
-    if(uSnap.exists() && uSnap.data().notifs){
-      const fbNotifs = uSnap.data().notifs;
-      const localNotifs = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
-      // Merge: keep all unique by id
-      const merged = [...localNotifs];
-      fbNotifs.forEach(fn=>{ if(!merged.find(ln=>ln.id===fn.id)) merged.push(fn); });
-      localStorage.setItem('gt_notifs', JSON.stringify(merged));
-  if(window._user){ try{ F().setDoc(F().doc(DB(),'users',window._user.uid),{notifs:JSON.parse(localStorage.getItem('gt_notifs')||'[]')},{merge:true}).catch(()=>{}); }catch(e){} }
-    }
-  }catch(e){}
-  // Restore favs from Firebase
-  try{
-    const uSnap2 = await F().getDoc(F().doc(DB(),'users',window._user.uid));
-    if(uSnap2.exists() && uSnap2.data().favs){
-      const fbFavs = uSnap2.data().favs;
-      const localFavs = getFavs();
-      const merged = [...new Set([...localFavs,...fbFavs])];
-      if(merged.length !== localFavs.length) saveFavs(merged);
-    }
-  }catch(e){}
-  loadHomeCare();
-  if(window._isAdmin){
-      document.getElementById('admin-panel').style.display='block';
-      loadAdminLists();
-      loadAdminInbox();
-      // Admin sees clinics & products tabs unlocked
-      document.querySelectorAll('.nb-soon').forEach(btn=>{
-        btn.style.opacity='1';
-        btn.style.cursor='pointer';
-      });
-      const nbtns=document.querySelectorAll('.nb-soon');
-      if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};const ni0=nbtns[0].querySelector('.nl');if(ni0)ni0.textContent='Клиники';}
-      if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};const ni1=nbtns[1].querySelector('.nl');if(ni1)ni1.textContent='Продукти';}
-    }
-    loadClinicsTab();loadProductsTab();
-    if(!window._isAdmin) checkOnboarding();  // called directly after auth, no fragile timeout
-    // Restore last page
-    const _lastPage = localStorage.getItem('gt_last_page');
-    if(_lastPage && _lastPage !== 'procs'){
-      try{
-        const _lastBtn = document.querySelector('[onclick*="goPage(\''+_lastPage+'\'"');
-        if(_lastBtn) goPage(_lastPage, _lastBtn);
-      }catch(e){}
-    }
-    // checkReminders disabled — using notifications tab instead
-    // Init notif badge = total count
-    const _initNotifs = JSON.parse(localStorage.getItem('gt_notifs')||'[]');
-    updateNotifBadge(_initNotifs.filter(n=>new Date(n.date)>=new Date()).length);
-    // Load user lang preference
-    F().getDoc(F().doc(DB(),'users',window._user.uid)).then(d=>{
-      if(d.exists()&&d.data().lang){window._lang=d.data().lang;localStorage.setItem('gt_lang',window._lang);}
-      if(typeof applyLang==='function')applyLang();else window._pendingLang=true;
-    }).catch(()=>{if(typeof applyLang==='function')applyLang();else window._pendingLang=true;});
-  }else{
-    window._user=null;window._isAdmin=false;
-    document.getElementById('auth-screen').classList.remove('hidden');
-    document.getElementById('app').classList.remove('show');
+  function loadScript(src, cb) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.crossOrigin = 'anonymous';
+    s.onload = cb;
+    s.onerror = function() {
+      document.body.innerHTML = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a2e;color:#f5f0ea;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif"><div><div style="font-size:48px;margin-bottom:16px">🌐</div><div style="font-size:18px;font-weight:700;margin-bottom:12px">Проблем с мрежата</div><div style="font-size:14px;color:#b8966a;margin-bottom:20px">Firebase не може да се зареди.<br>Провери интернет връзката.</div><button onclick="location.reload()" style="background:#b8966a;color:#fff;border:none;padding:12px 28px;border-radius:24px;font-size:15px;cursor:pointer">🔄 Опитай пак</button></div></div>';
+    };
+    document.head.appendChild(s);
   }
-});
 
+  // Зареди compat скриптовете последователно
+  loadScript(FB_BASE + 'firebase-app-compat.js', function() {
+    loadScript(FB_BASE + 'firebase-auth-compat.js', function() {
+      loadScript(FB_BASE + 'firebase-firestore-compat.js', function() {
+        // Firebase е готов — инициализирай
+        var fb = firebase.initializeApp(FB_CONFIG);
+        var auth = fb.auth();
+        var db = fb.firestore();
+        window._auth = auth;
+        window._db = db;
+
+        // Wrapper functions matching modular API
+        window._f = {
+          createUserWithEmailAndPassword: function(a,e,p){ return a.createUserWithEmailAndPassword(e,p); },
+          signInWithEmailAndPassword: function(a,e,p){ return a.signInWithEmailAndPassword(e,p); },
+          signOut: function(a){ return a.signOut(); },
+          updateProfile: function(u,d){ return u.updateProfile(d); },
+          updatePassword: function(u,p){ return u.updatePassword(p); },
+          deleteUser: function(u){ return u.delete(); },
+          collection: function(db,col){ return db.collection(col); },
+          doc: function(db,col,id){ return id ? db.collection(col).doc(id) : db.collection(col).doc(); },
+          addDoc: function(ref,data){ return ref.add(data); },
+          getDocs: function(q){ return q.get(); },
+          getDoc: function(ref){ return ref.get(); },
+          setDoc: function(ref,data,opts){ return (opts && opts.merge) ? ref.set(data,{merge:true}) : ref.set(data); },
+          updateDoc: function(ref,data){ return ref.update(data); },
+          deleteDoc: function(ref){ return ref.delete(); },
+          query: function(col){ 
+            var q = col;
+            for(var i=1;i<arguments.length;i++){
+              var c2=arguments[i];
+              if(c2 && c2._type==='where') q=q.where(c2._field,c2._op,c2._val);
+            }
+            return q;
+          },
+          where: function(field,op,val){ return {_type:'where',_field:field,_op:op,_val:val}; },
+          serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+        };
+
+        // Auth functions
+        window.doLogin = async function(){
+          var email = document.getElementById('login-email').value.trim();
+          var pass = document.getElementById('login-pass').value;
+          if(!email||!pass){window.showAuthError(t('fillAllFields'));return;}
+          var btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='...';
+          try{ await auth.signInWithEmailAndPassword(email,pass); }
+          catch(e){ window.showAuthError(t('wrongCredentials')); }
+          finally{ btn.disabled=false; btn.textContent='Влез'; }
+        };
+
+        window.doRegister = async function(){
+          var name=document.getElementById('reg-name').value.trim();
+          var email=document.getElementById('reg-email').value.trim();
+          var pass=document.getElementById('reg-pass').value;
+          if(!name||!email||!pass){window.showAuthError(t('fillAllFields'));return;}
+          if(pass.length<6){window.showAuthError('Паролата трябва да е поне 6 символа');return;}
+          var btn=document.getElementById('reg-btn');btn.disabled=true;btn.textContent='...';
+          try{
+            var cred=await auth.createUserWithEmailAndPassword(email,pass);
+            await cred.user.updateProfile({displayName:name});
+            await db.collection('users').doc(cred.user.uid).set({uid:cred.user.uid,name:name,email:email,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+          }catch(e){
+            window.showAuthError(e.code==='auth/email-already-in-use'?t('emailExists'):t('registerError'));
+          }finally{ btn.disabled=false; btn.textContent='Създай акаунт'; }
+        };
+
+        window.doLogout = async function(){
+          await auth.signOut();
+          window.showToast&&window.showToast(t('toastLogout'));
+        };
+
+        auth.onAuthStateChanged(async function(user){
+          if(user){
+            window._user=user;
+            window._isAdmin=(user.email==='neshovska@yahoo.com');
+            var loginSplash=document.getElementById('splash');
+            var loginLogo=document.getElementById('splash-logo');
+            if(loginSplash){loginSplash.style.display='flex';loginSplash.style.opacity='1';}
+            if(loginLogo){loginLogo.style.transform='scale(0.3)';loginLogo.style.opacity='0';}
+            setTimeout(function(){if(loginLogo){loginLogo.style.transform='scale(1)';loginLogo.style.opacity='1';}},100);
+            setTimeout(function(){document.getElementById('auth-screen').classList.add('hidden');document.getElementById('app').classList.add('show');},1800);
+            setTimeout(function(){if(loginSplash){loginSplash.style.opacity='0';setTimeout(function(){loginSplash.style.display='none';},600);}},2000);
+            document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
+            document.getElementById('prof-email').textContent=user.email;
+            document.getElementById('topbar-right').textContent='';
+            var _name=user.displayName||user.email.split('@')[0]||'';
+            var _parts=_name.trim().split(/\s+/);
+            var _ini=(_parts[0]?_parts[0][0]:'')+((_parts.length>1&&_parts[_parts.length-1])?_parts[_parts.length-1][0]:'');
+            var _iniUp=_ini.toUpperCase();
+            var _navSvg=document.getElementById('nav-avatar');
+            var _profSvg=document.getElementById('profile-av-wrap');
+            if(_navSvg)_navSvg.textContent=_iniUp;
+            if(_profSvg)_profSvg.textContent=_iniUp;
+            var _navBtn=document.getElementById('nav-profile-btn');
+            if(_navBtn){var svgEls=_navBtn.querySelectorAll('circle,path,text');svgEls.forEach(function(el){if(el.tagName!=='text'){el.setAttribute('stroke','#b8966a');el.setAttribute('fill',el.getAttribute('fill')?'rgba(184,150,106,.25)':'none');}else{el.setAttribute('fill','#b8966a');}});}
+            if(typeof loadFavsList==='function')loadFavsList();
+            if(typeof updateFavsStat==='function')updateFavsStat();
+            if(typeof loadNotifProcSelector==='function')loadNotifProcSelector();
+            try{
+              var uSnap=await db.collection('users').doc(user.uid).get();
+              if(uSnap.exists&&uSnap.data()&&uSnap.data().notifs){
+                var fbNotifs=uSnap.data().notifs;
+                var localNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');
+                var merged=[].concat(localNotifs);
+                fbNotifs.forEach(function(fn){if(!merged.find(function(ln){return ln.id===fn.id;}))merged.push(fn);});
+                localStorage.setItem('gt_notifs',JSON.stringify(merged));
+              }
+            }catch(e){}
+            try{
+              var uSnap2=await db.collection('users').doc(user.uid).get();
+              if(uSnap2.exists&&uSnap2.data()&&uSnap2.data().favs){
+                var fbFavs=uSnap2.data().favs;
+                var localFavs=typeof getFavs==='function'?getFavs():[];
+                var merged2=[].concat([...new Set([].concat(localFavs,fbFavs))]);
+                if(merged2.length!==localFavs.length&&typeof saveFavs==='function')saveFavs(merged2);
+              }
+            }catch(e){}
+            if(typeof loadHomeCare==='function')loadHomeCare();
+            if(window._isAdmin){
+              var ap=document.getElementById('admin-panel');if(ap)ap.style.display='block';
+              if(typeof loadAdminLists==='function'){loadAdminLists();loadAdminInbox();}
+              document.querySelectorAll('.nb-soon').forEach(function(btn){btn.style.opacity='1';btn.style.cursor='pointer';});
+              var nbtns=document.querySelectorAll('.nb-soon');
+              if(nbtns[0]){nbtns[0].onclick=function(){goPage('clinics',this);};var ni0=nbtns[0].querySelector('.nl');if(ni0)ni0.textContent='Клиники';}
+              if(nbtns[1]){nbtns[1].onclick=function(){goPage('products',this);};var ni1=nbtns[1].querySelector('.nl');if(ni1)ni1.textContent='Продукти';}
+            }
+            if(typeof loadClinicsTab==='function')loadClinicsTab();
+            if(typeof loadProductsTab==='function')loadProductsTab();
+            if(!window._isAdmin&&typeof checkOnboarding==='function')checkOnboarding();
+            var _lastPage=localStorage.getItem('gt_last_page');
+            if(_lastPage&&_lastPage!=='procs'){
+              try{
+                var _pageMap={'notifs':'page-notifs','diary':'page-diary','profile':'page-profile','clinics':'page-clinics','products':'page-products'};
+                if(_pageMap[_lastPage]&&typeof goPage==='function')goPage(_lastPage,null);
+              }catch(e){}
+            }
+            var _initNotifs=JSON.parse(localStorage.getItem('gt_notifs')||'[]');
+            if(typeof updateNotifBadge==='function')updateNotifBadge(_initNotifs.filter(function(n){return new Date(n.date)>=new Date();}).length);
+            db.collection('users').doc(user.uid).get().then(function(d){
+              if(d.exists&&d.data()&&d.data().lang){window._lang=d.data().lang;localStorage.setItem('gt_lang',window._lang);}
+              if(typeof applyLang==='function')applyLang();else window._pendingLang=true;
+            }).catch(function(){if(typeof applyLang==='function')applyLang();else window._pendingLang=true;});
+          }else{
+            window._user=null;window._isAdmin=false;
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('app').classList.remove('show');
+          }
+        });
+
+      }); // firestore loaded
+    }); // auth loaded
+  }); // app loaded
+})();
 </script>
+
 <script>
 
 const CATS_LIST=[
@@ -1260,6 +1316,18 @@ const T = {
     newPass: 'Нова парола (по желание)',
     saveBtn2: 'Запази',
     cancelBtn: 'Откажи',
+    namePh2: 'Твоето име',
+    searchProcs: 'Търси процедура...',
+    searchClinics: 'Търси клиника или процедура...',
+    searchProducts: 'Търси продукт или процедура...',
+    descPh: 'Описание...',
+    suggestionPh: 'Опиши предложението си...',
+    wrongCredentials: t('wrongCredentials'),
+    emailExists: t('emailExists'),
+    registerError: t('registerError'),
+    fillAllFields: t('fillAllFields'),
+    aiQuestionPh: 'Задай въпрос...',
+    emailPh2: 'Твоят имейл',
     exportCSV: 'Експортирай дневника (CSV)',
     deleteBtn: '🗑️ Изтрий профила',
     // Sheet
@@ -1448,6 +1516,18 @@ const T = {
     newPass: 'New password (optional)',
     saveBtn2: 'Save',
     cancelBtn: 'Cancel',
+    namePh2: 'Your name',
+    searchProcs: 'Search procedure...',
+    searchClinics: 'Search clinic or procedure...',
+    searchProducts: 'Search product or procedure...',
+    descPh: 'Description...',
+    suggestionPh: 'Describe your suggestion...',
+    wrongCredentials: 'Wrong email or password',
+    emailExists: 'Email already registered',
+    registerError: 'Error during registration',
+    fillAllFields: 'Please fill all fields',
+    aiQuestionPh: 'Ask a question...',
+    emailPh2: 'Your email',
     exportCSV: 'Export diary (CSV)',
     deleteBtn: '🗑️ Delete profile',
     whatIs: 'What it is',
@@ -1672,6 +1752,9 @@ function applyLang(){
     const key=el.getAttribute('data-ph');
     if(key) el.placeholder=t(key);
   });
+  // Update search placeholder
+  const sp=document.getElementById('proc-search');
+  if(sp) sp.placeholder=t('searchProcs');
 
   // Re-render procedures with new language
   renderCats();
@@ -1767,6 +1850,100 @@ const PROCS_EN = {
   'le-diode-body': {name:'Diode Laser — Body', sub:'810nm · Universal, all skin types', what:'The 810nm diode laser is the choice of most clinics. Soprano ICE Platinum can treat even darker skin and light tans. Cooling technology minimises discomfort.', subcat:'Diode Laser', zones:'Underarms, arms, legs, intimate area, chest, abdomen, back, buttocks, shoulders, lower back', results:['70–90% permanent reduction after full 6–10 session course','Hair sheds in <strong>10–14 days</strong> after session','Progressive thinning from session 2–3 onwards','Full result assessment 3 months after last session'], contra:['Pregnancy and breastfeeding','Active tan or recent sun exposure','Active skin infections or herpes','Photosensitive medications (Roaccutane, antibiotics)','Tattoos in the treated area'], before:[['🪒','Shave the area <strong>24–48h before</strong> — no waxing or threading'],['☀️','No sun or tanning bed <strong>~5 days</strong>'],['🧴','No self-tanners 2 weeks'],['💊','Inform specialist of all medications']], after:[['🧴','Apply <strong>100% Aloe Vera</strong> or soothing cream'],['🧴','<strong>SPF 50+</strong> — mandatory when outdoors'],['🚿','<strong>Cool</strong> showers 24–48h'],['🚫','NO sauna, jacuzzi, pool 24–48h'],['🏋️','NO intense exercise on the day'],['✂️','Between sessions — shaving only']], interval:'Face: 30–40 days · Torso: 45–60 days · Legs: 60–90 days', sessions:'6–10 sessions — interval widens as course progresses'},
   'le-ndyag-face': {name:'Nd:YAG Laser — Face', sub:'1064nm · Darker skin, tanned skin', what:'Nd:YAG (1064nm) is the only safe choice for darker skin types (IV–VI) and tanned skin. Penetrates deeper and is effective for coarser hair.', subcat:'Nd:YAG Laser', zones:'Upper lip, chin, cheekbones, sideburns — for darker skin types', results:['70–90% permanent reduction after full 6–10 session course','Hair sheds in <strong>10–14 days</strong> after session','Progressive thinning from session 2–3 onwards','Full result assessment 3 months after last session'], contra:['Pregnancy and breastfeeding','Active tan or recent sun exposure','Active skin infections or herpes','Photosensitive medications (Roaccutane, antibiotics)','Tattoos in the treated area'], before:[['🪒','Shave the area <strong>24–48h before</strong>'],['☀️','No sun or tanning bed <strong>2–4 weeks</strong>'],['🧴','No self-tanners 2 weeks'],['💊','Inform specialist of all medications']], after:[['🧴','Apply <strong>100% Aloe Vera</strong> or soothing cream'],['🧴','<strong>SPF 50+</strong> — mandatory'],['🚿','<strong>Cool</strong> showers 24–48h'],['🚫','NO sauna, jacuzzi, pool 24–48h'],['🏋️','NO intense exercise on the day'],['✂️','Between sessions — shaving only']], interval:'Face: 30–40 days · Torso: 45–60 days · Legs: 60–90 days', sessions:'8–12 sessions'},
   'le-ndyag-body': {name:'Nd:YAG Laser — Body', sub:'1064nm · Darker skin, tanned skin', what:'Nd:YAG is mandatory for darker skin (III–VI Fitzpatrick) or after sun exposure. Effective for coarse body hair.', subcat:'Nd:YAG Laser', zones:'Underarms, arms, legs, intimate area, back — for darker skin types', results:['70–90% permanent reduction after full 6–10 session course','Hair sheds in <strong>10–14 days</strong> after session','Progressive thinning from session 2–3 onwards','Full result assessment 3 months after last session'], contra:['Pregnancy and breastfeeding','Active tan or recent sun exposure','Active skin infections or herpes','Photosensitive medications (Roaccutane, antibiotics)','Tattoos in the treated area'], before:[['🪒','Shave the area <strong>24–48h before</strong>'],['☀️','No sun or tanning bed <strong>2–4 weeks</strong>'],['🧴','No self-tanners 2 weeks'],['💊','Inform specialist of all medications']], after:[['🧴','Apply <strong>100% Aloe Vera</strong> or soothing cream'],['🧴','<strong>SPF 50+</strong> — mandatory'],['🚿','<strong>Cool</strong> showers 24–48h'],['🚫','NO sauna, jacuzzi, pool 24–48h'],['🏋️','NO intense exercise on the day'],['✂️','Between sessions — shaving only']], interval:'Face: 30–40 days · Torso: 45–60 days · Legs: 60–90 days', sessions:'8–12 sessions'},
+
+  // ── Laser Epilation ──
+  'le-electro': {name:'Electrolysis — Permanent Hair Removal', sub:'The only method with 100% permanent results', subcat:'Electrolysis', what:'Electrolysis is the only FDA-approved method for permanent hair removal. Works on all hair colours including blonde, grey and red — where lasers are ineffective.', zones:'Upper lip, chin, eyebrows, bikini line, individual hairs', results:['100% permanent elimination of treated follicles','Effective on all hair and skin types','Ideal for small areas with sparse hair'], contra:['Pacemaker (galvanic method)','Active skin infections','Pregnancy (consult specialist)'], before:[['✂️','Leave hair <strong>2–3mm</strong> long — no waxing'],['🧴','No active skincare on the day']], after:[['🧴','Apply soothing cream (Aloe, Bepanthen)'],['☀️','Avoid sun exposure for 48h']], interval:'Weekly or fortnightly', sessions:'Many sessions — months to years'},
+  // ── Face Cleansing ──
+  'clean-classic': {name:'Classic Manual Facial', sub:'Exfoliation, extractions, mask', subcat:'Facial Cleansing', what:'Traditional manual cleansing by a trained aesthetician. Includes gentle exfoliation, steam, extractions and a calming mask. Suitable for all skin types.', zones:'Face, neck, décolleté, back', results:['Deep-cleansed pores','Smoother texture','Immediate radiance'], contra:['Active rosacea flare-up','Open wounds or irritation','Severe cystic acne'], before:[['💄','Arrive with no makeup'],['☀️','Avoid sun the day before']], after:[['💧','Keep skin hydrated'],['☀️','SPF 50+ daily'],['💄','No makeup for 12–24h']], interval:'3–4 weeks', sessions:'Ongoing maintenance'},
+  'clean-medical': {name:'Medical Facial Cleansing', sub:'Deep with ultrasound, galvanic, cryotherapy, LED', subcat:'Facial Cleansing', what:'Advanced clinical cleansing combining ultrasound spatula, galvanic current, high-frequency and LED light. Goes deeper than a classic facial.', zones:'Face, neck, décolleté', results:['Deeply cleansed pores','Reduced sebum and blackheads','Improved skin tone'], contra:['Active rosacea','Pregnancy (high-frequency)','Metal implants in face'], before:[['💄','No makeup'],['🧴','No actives 3 days prior']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+'],['💄','No makeup 12–24h']], interval:'3–4 weeks', sessions:'Course recommended'},
+  'clean-hydra': {name:'Hydrodermabrasion — HydraFacial / DermaClear', sub:'Mechanical cleansing with simultaneous serum infusion', subcat:'Device Cleansing', what:'Patented vortex technology simultaneously exfoliates, extracts and infuses skin with customised serums. No downtime, instant glow.', zones:'Face, neck, décolleté, hands', results:['Instantly cleansed and glowing skin','Reduced fine lines and pores','Deep hydration'], contra:['Active rosacea or eczema','Sunburn','Open wounds'], before:[['💄','No makeup'],['☀️','Avoid sun 48h']], after:[['💧','Hydrate well'],['☀️','SPF 50+'],['💄','No makeup 12h']], interval:'2–4 weeks', sessions:'Single or course'},
+  'clean-ultrasound': {name:'Ultrasonic Spatula', sub:'Gentle exfoliation and deep pore cleansing', subcat:'Device Cleansing', what:'High-frequency ultrasonic vibrations loosen and lift dead skin cells, sebum and blackheads without abrasion. Gentle enough for sensitive skin.', zones:'Face', results:['Cleaner pores','Smoother texture','Brighter complexion'], contra:['Pregnancy','Metal implants in face','Active open acne'], before:[['💄','No makeup'],['💧','Skin should be damp']], after:[['🧴','Gentle moisturiser'],['☀️','SPF 50+']], interval:'2–4 weeks', sessions:'Ongoing'},
+  // ── Medik8 Facials ──
+  'm8-crystal': {name:'Medik8 Crystal Retinal Age-Defying Facial', sub:'Advanced retinal anti-ageing treatment', subcat:'Medik8', what:'Professional retinal treatment targeting fine lines, skin texture and radiance. Uses Medik8 Crystal Retinal — up to 11× more effective than standard retinol.', zones:'Face, neck, décolleté', results:['Visibly reduced fine lines','Improved texture and firmness','Enhanced radiance'], contra:['Pregnancy and breastfeeding','Roaccutane (6+ months)','Extreme skin sensitivity'], before:[['🧴','Stop retinol 5–7 days prior'],['☀️','Avoid sun previous week']], after:[['💧','Rich moisturiser'],['☀️','SPF 50+ essential'],['💄','No makeup 24h']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'm8-platinum': {name:'Medik8 Platinum Facial', sub:'Ultimate luxury anti-ageing experience', subcat:'Medik8', what:'The most comprehensive Medik8 protocol — combines vitamin C, peptides and retinal for maximum anti-ageing results. Deep-acting and result-driven.', zones:'Face, neck, décolleté', results:['Significant firming and lifting','Intense brightening','Long-lasting results'], contra:['Pregnancy','Roaccutane (6+ months)','Active skin infections'], before:[['🧴','Stop actives 5–7 days'],['💄','No makeup on day']], after:[['💧','Nourishing moisturiser'],['☀️','SPF 50+']], interval:'4 weeks', sessions:'Course of 4–6'},
+  'm8-hydration': {name:'Medik8 Deep Hydration Facial', sub:'Intense moisture surge for dry and dehydrated skin', subcat:'Medik8', what:'Hyaluronic acid-based protocol delivering deep hydration at multiple skin levels. Plumps, smooths and restores moisture barrier.', zones:'Face, neck', results:['Intense lasting hydration','Plumper, smoother skin','Restored moisture barrier'], contra:['Active infections','Open wounds'], before:[['💄','No makeup'],['🧴','Stop exfoliants 3 days']], after:[['💧','Keep skin hydrated'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Single or course'},
+  'm8-clarity-facial': {name:'Medik8 Clarity Facial', sub:'Acne, oily, problematic skin', subcat:'Medik8', what:'Targeted treatment for acne-prone and oily skin. Combines salicylic acid, niacinamide and antibacterial actives to clear breakouts and reduce sebum.', zones:'Face', results:['Reduced breakouts','Minimised pores','Clearer, more balanced skin'], contra:['Extreme sensitivity','Open active lesions'], before:[['🧴','Stop strong actives 3 days'],['💄','No makeup']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course recommended'},
+  'm8-pore': {name:'Medik8 Pore Refining Facial', sub:'Enlarged pores, uneven texture', subcat:'Medik8', what:'Niacinamide and AHA/BHA-based treatment to visibly minimise pores and refine skin texture. Ideal for oily and combination skin.', zones:'Face', results:['Minimised pore appearance','Smoother texture','Reduced oiliness'], contra:['Sensitivity to acids','Rosacea in acute phase'], before:[['🧴','Stop AHA/BHA 5 days'],['💄','No makeup']], after:[['💧','Moisturise well'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'm8-calming': {name:'Medik8 Calming Facial', sub:'Sensitive, irritated, red skin', subcat:'Medik8', what:'Gentle, fragrance-free protocol for reactive and sensitive skin. Uses calming botanicals and barrier-repair actives to reduce redness and irritation.', zones:'Face, neck', results:['Reduced redness and irritation','Strengthened skin barrier','Calmer, more comfortable skin'], contra:['Open wounds','Extreme active flare-up'], before:[['🧴','Stop actives 3 days'],['💄','No makeup']], after:[['💧','Barrier-repair moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'As needed'},
+  'm8-expert': {name:'Medik8 Expert Facial (Bespoke)', sub:'Individualised treatment based on skin analysis', subcat:'Medik8', what:'The specialist analyses your skin and configures a bespoke treatment to your specific needs. Combines multiple Medik8 protocols for optimal results.', zones:'Face, neck, décolleté, back', results:['Targeted results for your specific concern','Visible improvement immediately after'], contra:['Active severe acne','Rosacea in acute phase','Pregnancy (for peels)','Roaccutane (6+ months)'], before:[['🧴','Stop retinol, AHA/BHA 5–7 days'],['☀️','No sun exposure previous week'],['💄','No makeup or self-tan on the day']], after:[['💧','Hydrate with gentle serum'],['☀️','SPF 50+ every morning'],['💄','No makeup 12–24h']], interval:'3–4 weeks', sessions:'Single or course'},
+  // ── Medik8 Peels ──
+  'm8-reset-peel': {name:'Medik8 Total Skin Reset Peel', sub:'3-in-1 exfoliation — radiance, texture, minimal downtime', subcat:'Medik8 — Peels', what:'Professional peel combining lactic, glycolic and salicylic acids for a comprehensive skin reset. Addresses texture, dullness and mild pigmentation in one session.', zones:'Face, neck, décolleté', results:['Smoother, brighter skin','Refined pores','Minimal downtime'], contra:['Pregnancy','Roaccutane (6+ months)','Sensitivity to acids','Active infections'], before:[['🧴','Stop AHA/BHA and retinol 5–7 days'],['☀️','No sun exposure']], after:[['💧','Gentle moisturiser only'],['☀️','SPF 50+ essential'],['💄','No makeup 24h'],['🚿','Lukewarm water only']], interval:'3–4 weeks', sessions:'Course of 3–6'},
+  'm8-clarity-peel': {name:'Medik8 Clarity Peel', sub:'Acne, imperfections, congested skin', subcat:'Medik8 — Peels', what:'High-strength salicylic and mandelic acid peel targeting active breakouts, congestion and post-acne marks. Deep-cleans follicles and regulates sebum.', zones:'Face, back', results:['Cleared breakouts','Reduced sebum and congestion','Improved post-acne marks'], contra:['Pregnancy','Sensitivity to salicylates','Active open wounds'], before:[['🧴','Stop actives 5–7 days'],['💄','No makeup']], after:[['💧','Barrier-repair cream'],['☀️','SPF 50+ essential'],['🚿','No hot water 48h']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'm8-even-peel': {name:'Medik8 Even Peel', sub:'Pigmentation, sun spots, uneven tone', subcat:'Medik8 — Peels', what:'Targeted depigmentation peel with azelaic acid, kojic acid and vitamin C to fade dark spots and unify skin tone. Suitable for most skin types.', zones:'Face, neck, hands, décolleté', results:['Visibly faded dark spots','More even skin tone','Brighter complexion'], contra:['Pregnancy','Hypersensitivity to actives','Roaccutane (6+ months)'], before:[['🧴','Stop vitamin C and AHA 5 days'],['☀️','No sun 2 weeks']], after:[['☀️','SPF 50+ absolutely essential'],['💧','Gentle moisturiser'],['🚿','No hot water 48h']], interval:'4 weeks', sessions:'Course of 4–6'},
+  'm8-age-peel': {name:'Medik8 Age-Defying Peel', sub:'Wrinkles, loss of elasticity, photoageing', subcat:'Medik8 — Peels', what:'Advanced retinal and peptide peel targeting signs of ageing — fine lines, loss of firmness and photoageing. Stimulates collagen production.', zones:'Face, neck, décolleté', results:['Reduced fine lines','Improved firmness and elasticity','Smoother, younger-looking skin'], contra:['Pregnancy','Roaccutane (6+ months)','Extreme sensitivity'], before:[['🧴','Stop retinol 7 days'],['☀️','No sun 2 weeks']], after:[['💧','Rich nourishing moisturiser'],['☀️','SPF 50+ essential'],['💄','No makeup 24–48h']], interval:'4 weeks', sessions:'Course of 4–6'},
+  // ── Esthemax Hydrojelly ──
+  'es-hyaluronic': {name:'Esthemax Hydrojelly — Hyaluronic Acid', sub:'Intense hydration and plumping', subcat:'Esthemax Hydrojelly', what:'Jelly mask with ultra-pure hyaluronic acid delivering instant deep hydration. Plumps fine lines and restores glow. Suitable for all skin types.', zones:'Face, neck, décolleté', results:['Instant intense hydration','Plumper skin, faded fine lines','Radiant glow'], contra:['Known allergy to hyaluronic acid'], before:[['💄','Clean skin, no makeup']], after:[['💧','Maintain hydration'],['☀️','SPF 50+']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-24k': {name:'Esthemax Hydrojelly — Youthful Elixir (24K Gold & Truffle)', sub:'Premium anti-ageing mask with 24K gold and truffle', subcat:'Esthemax Hydrojelly', what:'Luxurious jelly mask combining 24K gold and black truffle extract. Powerful antioxidant and anti-ageing action — immediate lifting and radiance.', zones:'Face, neck, décolleté', results:['Instant lifting and radiance','Antioxidant protection','Luxurious skin feel'], contra:['Known gold allergy'], before:[['💄','Clean skin']], after:[['💧','Gentle serum'],['☀️','SPF 50+']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-rose': {name:'Esthemax Hydrojelly — Egyptian Rose', sub:'8 types of rose — hydration, firming, radiance', subcat:'Esthemax Hydrojelly', what:'Rose-infused jelly mask with 8 varieties of rose extract. Soothes, hydrates and brightens. Ideal for sensitive, dry or stressed skin.', zones:'Face, neck', results:['Intense hydration and calming','Improved radiance and firmness','Reduced redness'], contra:['Known rose allergy'], before:[['💄','Clean skin']], after:[['💧','Moisturise'],['☀️','SPF 50+']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-charcoal': {name:'Esthemax Hydrojelly — Activated Charcoal', sub:'Detox and deep pore cleansing', subcat:'Esthemax Hydrojelly', what:'Activated charcoal jelly mask for deep detoxification and pore purification. Absorbs excess sebum and impurities without drying the skin.', zones:'Face (especially T-zone)', results:['Deep-cleansed pores','Reduced oiliness','Clearer, fresher skin'], contra:['Extremely dry or sensitive skin'], before:[['💄','Clean skin']], after:[['💧','Lightweight moisturiser']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-greentea': {name:'Esthemax Hydrojelly — Green Tea Tree', sub:'Acne, redness — antibacterial and soothing', subcat:'Esthemax Hydrojelly', what:'Jelly mask combining green tea and tea tree oil for anti-bacterial, anti-inflammatory action. Ideal for acne-prone or congested skin.', zones:'Face', results:['Reduced breakouts and redness','Antibacterial action','Calmer, clearer skin'], contra:['Known allergy to tea tree'], before:[['💄','Clean skin']], after:[['💧','Lightweight hydration']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-goji': {name:'Esthemax Hydrojelly — Antioxidant Goji', sub:'Radiance, antioxidant protection, fatigue', subcat:'Esthemax Hydrojelly', what:'Goji berry-infused jelly mask rich in antioxidants and vitamin C. Fights free radical damage, boosts radiance and revitalises tired skin.', zones:'Face, neck', results:['Boosted radiance','Antioxidant protection','Revitalised, firmer skin'], contra:['Known goji allergy'], before:[['💄','Clean skin']], after:[['💧','Moisturise'],['☀️','SPF 50+']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-aftercare': {name:'Esthemax Hydrojelly — Intensive Aftercare', sub:'Soothing mask after laser, peel, depilation', subcat:'Esthemax Hydrojelly', what:'Post-procedure recovery mask with aloe vera and calming botanicals. Reduces redness, cools and accelerates healing after laser, chemical peels or waxing.', zones:'Face, body (post-procedure areas)', results:['Immediate cooling and calming','Reduced redness and irritation','Faster recovery'], contra:['Open wounds (consult specialist)'], before:[['💄','Proceed immediately after treatment']], after:[['💧','Gentle barrier cream']], interval:'As needed post-procedure', sessions:'Single or course'},
+  'es-vitc': {name:'Esthemax Hydrojelly — Vitamin C Brightening', sub:'Pigment spots, uneven tone, fatigue', subcat:'Esthemax Hydrojelly', what:'High-potency vitamin C jelly mask to brighten dull skin, fade pigmentation and even skin tone. Boosts collagen synthesis for a visibly younger look.', zones:'Face, neck, décolleté, hands', results:['Faded dark spots','More even, brighter tone','Antioxidant protection'], contra:['Known vitamin C sensitivity'], before:[['💄','Clean skin'],['☀️','Apply SPF after']], after:[['☀️','SPF 50+ essential'],['💧','Gentle moisturiser']], interval:'2–4 weeks', sessions:'As needed'},
+  'es-collagen': {name:'Esthemax Hydrojelly — Collagen', sub:'Anti-ageing, firming and elasticity', subcat:'Esthemax Hydrojelly', what:'Marine collagen jelly mask to firm, plump and improve elasticity. Targets fine lines and loss of firmness for a visibly more youthful appearance.', zones:'Face, neck, décolleté', results:['Firmer, plumper skin','Reduced fine lines','Improved elasticity'], contra:['Fish allergy (marine collagen)'], before:[['💄','Clean skin']], after:[['💧','Nourishing moisturiser']], interval:'2–4 weeks', sessions:'As needed'},
+  // ── Forlle'd ──
+  "forlle-hydra": {name:"Forlle'd — Hydrating Therapy", sub:'Deep hydration with nano HA', subcat:"Forlle'd", what:"Forlle'd uses nano-sized hyaluronic acid molecules that penetrate deeper than standard HA. Restores moisture at every skin layer for long-lasting plumpness.", zones:'Face, neck, décolleté', results:["Deep, long-lasting hydration","Plumper, smoother skin","Improved barrier function"], contra:['Known HA allergy','Active infections'], before:[['💄','Clean skin'],['🧴','No strong actives 3 days']], after:[['💧','Maintain hydration'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  "forlle-ion": {name:"Forlle'd Ion Booster Therapy", sub:'Electroporation for deep serum penetration', subcat:"Forlle'd", what:"Ion Booster uses electroporation technology to drive active ingredients up to 400× deeper into the skin than topical application alone. Maximum absorption, maximum results.", zones:'Face, neck, décolleté', results:["Dramatically enhanced active ingredient absorption","Immediate visible improvement","Long-lasting hydration and firmness"], contra:['Pacemaker','Pregnancy','Metal implants in face'], before:[['💄','Clean skin'],['🧴','No makeup']], after:[['💧',"Apply prescribed Forlle'd serum"],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  // ── HydroPeptide ──
+  'hp-hydroglow': {name:'HydroPeptide HydroGlow Facial', sub:'Peptide-powered hydration and radiance', subcat:'HydroPeptide', what:'HydroPeptide\'s signature facial combining multiple peptides, enzymes and hyaluronic acid for instant glow and lasting hydration.', zones:'Face, neck, décolleté', results:['Immediate radiance','Deep hydration','Smoother texture'], contra:['Active infections','Known peptide sensitivity'], before:[['💄','No makeup'],['🧴','No actives 3 days']], after:[['💧','Nourishing moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'As needed'},
+  'hp-collagen': {name:'HydroPeptide Collagen Renew Facial', sub:'Collagen-stimulating anti-ageing protocol', subcat:'HydroPeptide', what:'Targeted collagen-stimulating treatment using peptides, vitamin C and retinol. Addresses fine lines, firmness and photoageing.', zones:'Face, neck', results:['Stimulated collagen production','Reduced fine lines','Improved firmness'], contra:['Pregnancy','Roaccutane (6+ months)'], before:[['🧴','Stop retinol 5 days'],['☀️','No sun prior week']], after:[['💧','Nourishing moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'hp-powerlift': {name:'HydroPeptide Power Lift Facial', sub:'Lifting and firming for mature skin', subcat:'HydroPeptide', what:'Intensive lifting protocol with biomimetic peptides and growth factors. Targets deep wrinkles and significant loss of firmness.', zones:'Face, neck, décolleté', results:['Visible lifting','Firmer skin contour','Reduced deep wrinkles'], contra:['Active infections','Known sensitivity'], before:[['💄','No makeup'],['🧴','Stop actives 3 days']], after:[['💧','Rich moisturiser'],['☀️','SPF 50+']], interval:'4 weeks', sessions:'Course of 6'},
+  'hp-calming': {name:'HydroPeptide Calming Recovery Facial', sub:'Sensitive, reactive and compromised skin', subcat:'HydroPeptide', what:'Ultra-gentle protocol for sensitive and reactive skin. Peptides and calming botanicals reduce inflammation and strengthen the skin barrier.', zones:'Face, neck', results:['Reduced redness and irritation','Strengthened barrier','Calmer skin'], contra:['Open wounds','Active flare-ups'], before:[['💄','No makeup'],['🧴','No actives 5 days']], after:[['💧','Barrier-repair cream'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'As needed'},
+  // ── Mesoesthetic ──
+  'meso-cosmelan': {name:'Mesoesthetic Cosmelan Depigmentation System', sub:'Professional depigmentation for stubborn pigmentation', subcat:'Mesoesthetic', what:'The world\'s leading professional depigmentation system. Inhibits melanin production at multiple pathways. Effective on melasma, post-inflammatory hyperpigmentation and sun damage.', zones:'Face, neck, décolleté, hands', results:['Significant reduction in pigmentation','Clearer, more even skin tone','Long-lasting results with maintenance'], contra:['Pregnancy and breastfeeding','Active skin infections','Extreme photosensitivity'], before:[['☀️','Strict sun avoidance 2 weeks'],['🧴','Stop all actives 1 week'],['💊','Inform specialist of all medications']], after:[['☀️','SPF 50+ mandatory — morning and evening','Strict sun avoidance 30 days'],['💧','Prescribed Cosmelan maintenance cream'],['💄','No makeup 48h']], interval:'Single session + maintenance', sessions:'1 session + home protocol'},
+  'meso-mesopeel': {name:'Mesoesthetic Mesopeel', sub:'Professional chemical peel — multiple intensities', subcat:'Mesoesthetic', what:'Range of professional chemical peels (superficial, medium, deep) with TCA, glycolic, salicylic and mandelic acids. Customised to skin concern and type.', zones:'Face, neck, décolleté, hands, back', results:['Renewed skin texture','Reduced pigmentation, wrinkles and acne marks','Brighter, smoother complexion'], contra:['Pregnancy','Roaccutane (6+ months)','Active infections','Extreme photosensitivity'], before:[['🧴','Stop all actives 5–7 days'],['☀️','No sun 2 weeks']], after:[['💧','Prescribed post-peel cream'],['☀️','SPF 50+ essential'],['💄','No makeup 24–48h'],['🚿','Lukewarm water only']], interval:'3–4 weeks', sessions:'Course of 3–6'},
+  'meso-skinreborn': {name:'Mesoesthetic Skin Reborn', sub:'Bio-revitalisation with HA + growth factors', subcat:'Mesoesthetic', what:'Advanced bio-revitalisation protocol combining hyaluronic acid, amino acids and growth factors. Restores skin vitality, hydration and youthful appearance.', zones:'Face, neck, décolleté, hands', results:['Intense hydration','Improved skin quality and radiance','Reduced fine lines'], contra:['Pregnancy','Active infections','Known allergy to components'], before:[['💄','No makeup'],['🧴','No actives 3 days']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 3–4'},
+  // ── RoseQure & LED ──
+  'rosequre': {name:'RoseQure Therapy', sub:'Biostimulation with rose stem cells and MFIII', subcat:'RoseQure', what:'Advanced bio-stimulating treatment using rose stem cells and Swiss MFIII cellular extracts. Promotes cell renewal, collagen synthesis and skin rejuvenation at a cellular level.', zones:'Face, neck, décolleté', results:['Cellular regeneration','Improved firmness and radiance','Anti-ageing biostimulation'], contra:['Active infections','Known plant allergy'], before:[['💄','Clean skin'],['🧴','No actives 3 days']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'led-therapy': {name:'LED Phototherapy (Dermalux, Celluma)', sub:'Clinically proven light therapy for skin rejuvenation', subcat:'LED Therapy', what:'Medical-grade LED therapy using specific wavelengths (red, near-infrared, blue) to stimulate collagen production, reduce inflammation and clear acne. Non-invasive, zero downtime.', zones:'Face, neck, décolleté, scalp, body', results:['Stimulated collagen and elastin','Reduced acne and inflammation','Improved skin tone and texture'], contra:['Photosensitive medications','Active cancer','Epilepsy (flashing lights)','Pregnancy (as precaution)'], before:[['💄','No makeup or creams'],['💊','Inform specialist of medications']], after:[['💧','Apply prescribed serum or moisturiser'],['☀️','SPF 50+']], interval:'Weekly during course, monthly maintenance', sessions:'Course of 8–12'},
+  // ── Injectables / Botox ──
+  'botox-wrinkles': {name:'Botox — Wrinkle Smoothing', sub:'Forehead, frown lines, crow\'s feet', subcat:'Botulinum Toxin', what:'Botulinum toxin (Botox, Dysport, Xeomin) temporarily relaxes overactive facial muscles to smooth dynamic wrinkles. Results are natural, not frozen, when performed by an expert.', zones:'Forehead, frown lines (glabella), crow\'s feet, brow lift, bunny lines, lip flip, neck (Nefertiti)', results:['Smooth dynamic wrinkles for 3–6 months','Preventive anti-ageing effect','Natural, refreshed appearance'], contra:['Pregnancy and breastfeeding','Neuromuscular disorders (MG, ALS)','Known allergy to toxin','Active infection at injection site'], before:[['💊','Stop blood thinners 7 days (consult doctor)'],['🍷','No alcohol 24h'],['💄','No makeup on the day']], after:[['🏋️','No intense exercise 24h'],['🚿','No sauna or heat 48h'],['😊','Do NOT massage the area'],['💊','No blood thinners 24h']], interval:'3–6 months', sessions:'Ongoing maintenance'},
+  'botox-hyperhidrosis': {name:'Botox — Hyperhidrosis', sub:'Excessive sweating — underarms, palms, feet', subcat:'Botulinum Toxin', what:'Botulinum toxin injections block the nerve signals that stimulate sweat glands. Dramatically reduces excessive sweating in treated areas for 6–12 months.', zones:'Underarms, palms, feet, forehead', results:['80–90% reduction in sweating','Lasts 6–12 months','Immediate improvement'], contra:['Pregnancy','Known allergy to toxin','Neuromuscular disorders'], before:[['🪒','Shave underarms 24h before'],['🍷','No alcohol 24h']], after:[['🏋️','No intense exercise 24h'],['🚿','No heat 48h']], interval:'6–12 months', sessions:'Ongoing'},
+  'botox-bruxism': {name:'Botox — Bruxism', sub:'Jaw clenching and teeth grinding', subcat:'Botulinum Toxin', what:'Masseter muscle injections reduce muscle bulk and tension causing bruxism. Relieves jaw pain, headaches and teeth damage. Also slims the lower face.', zones:'Masseter muscle (jaw)', results:['Reduced jaw clenching and grinding','Slimmer facial contour','Relief from headaches and jaw pain'], contra:['Pregnancy','Neuromuscular disorders','Active infection at site'], before:[['💄','No makeup on day']], after:[['😊','No chewing hard foods 24h'],['🏋️','No strenuous exercise 24h']], interval:'4–6 months', sessions:'Ongoing'},
+  // ── Fillers ──
+  'filler-juvederm': {name:'Juvederm Fillers (Voluma, Volift, Volbella, SKINVIVE)', sub:'Premium HA fillers — volume, lips, hydration', subcat:'HA Fillers', what:'Juvederm by Allergan — the world\'s leading HA filler range. Each product is engineered for specific areas: Voluma for cheeks, Volbella for lips, SKINVIVE for skin quality.', zones:'Cheeks, lips, nasolabial folds, tear troughs, chin, jaw, temples, skin quality', results:['Instant volume and contouring','Plumper, more defined lips','Improved skin hydration (SKINVIVE)','Results 12–18 months'], contra:['Pregnancy and breastfeeding','Blood thinners','Active infections','Known allergy to HA or lidocaine'], before:[['💊','Stop blood thinners 7 days'],['🍷','No alcohol 24h'],['💄','No makeup']], after:[['❄️','Cold compress for swelling'],['💊','No blood thinners 24h'],['🚿','No heat 48h'],['😊','No massage to area'],['☀️','SPF 50+']], interval:'12–18 months', sessions:'Touch-up as needed'},
+  'filler-restylane': {name:'Restylane Fillers (Defyne, Lyft, Skinboosters)', sub:'Natural-movement fillers and Skinboosters', subcat:'HA Fillers', what:'Restylane by Galderma uses NASHA technology for fillers that move naturally with facial expressions. Skinboosters improve overall skin quality, not just volume.', zones:'Lips, nasolabial folds, cheeks, hands, under-eyes, skin quality (Skinboosters)', results:['Natural-looking volume','Improved skin quality with Skinboosters','Results 6–18 months depending on product'], contra:['Pregnancy','Blood thinners','Active infections'], before:[['💊','Stop blood thinners 7 days'],['🍷','No alcohol 24h']], after:[['❄️','Cold compress'],['💊','No blood thinners 24h'],['🚿','No heat 48h']], interval:'6–18 months', sessions:'Touch-up as needed'},
+  'filler-stylage': {name:'Stylage Fillers (XXL, XL, M, Bi-Soft)', sub:'French HA fillers with antioxidant protection', subcat:'HA Fillers', what:'Stylage by Vivacy combines HA with mannitol antioxidant to reduce post-injection swelling and prolong results. Bi-Soft is ideal for delicate areas including lips.', zones:'Cheeks, lips, nasolabial folds, jaw, chin, tear troughs', results:['Precise, natural contouring','Reduced post-injection swelling (mannitol)','Results 12–18 months'], contra:['Pregnancy','Blood thinners','Active infections'], before:[['💊','Stop blood thinners 7 days'],['🍷','No alcohol 24h']], after:[['❄️','Cold compress'],['🚿','No heat 48h']], interval:'12–18 months', sessions:'As needed'},
+  'filler-teosyal': {name:'Teosyal Fillers (RHA, Kiss, PureSense)', sub:'Swiss resilient HA for dynamic areas', subcat:'HA Fillers', what:'Teosyal RHA (Resilient Hyaluronic Acid) is engineered to move with dynamic facial areas. Kiss is designed specifically for lips. PureSense minimises discomfort.', zones:'Dynamic zones (forehead, crow\'s feet), lips, nasolabial folds, cheeks', results:['Natural results in dynamic areas','Comfortable treatment (PureSense)','Results 12–18 months'], contra:['Pregnancy','Blood thinners','Active infections'], before:[['💊','Stop blood thinners 7 days']], after:[['❄️','Cold compress'],['🚿','No heat 48h']], interval:'12–18 months', sessions:'As needed'},
+  // ── Biostimulators ──
+  'bio-harmonyca': {name:'HarmonyCa (AbbVie) — HA + CaHA', sub:'Dual-action: immediate volume + collagen stimulation', subcat:'Biostimulators', what:'HarmonyCa combines HA for immediate volume with calcium hydroxyapatite (CaHA) for long-term collagen stimulation. One injection, dual and lasting effect.', zones:'Cheeks, jawline, temples, chin', results:['Immediate lifting and volume','Collagen stimulation lasting 12–24 months','Progressive improvement over time'], contra:['Pregnancy','Blood thinners','Known allergy to components','Active infections'], before:[['💊','Stop blood thinners 7 days'],['🍷','No alcohol 24h']], after:[['❄️','Cold compress'],['🚿','No heat 48h'],['😊','Gentle massage if advised']], interval:'12–24 months', sessions:'Single or top-up'},
+  'bio-sculptra': {name:'Sculptra (Galderma) — Poly-L-Lactic Acid (PLLA)', sub:'Long-term collagen regeneration', subcat:'Biostimulators', what:'Sculptra stimulates the body\'s own collagen production gradually over several months. Results appear slowly but last up to 2 years. Ideal for volume loss and overall rejuvenation.', zones:'Cheeks, temples, chin, nasolabial folds, jawline, décolleté, hands', results:['Gradual, natural-looking rejuvenation','Collagen stimulation for up to 2 years','Progressive improvement with each session'], contra:['Pregnancy','Active infections','Autoimmune conditions'], before:[['💊','Stop blood thinners 7 days'],['🍷','No alcohol 24h']], after:[['😊','Massage area 5-5-5: 5×/day for 5 min for 5 days'],['❄️','Cold compress first 48h'],['🚿','No heat 48h']], interval:'4–6 weeks between sessions, results last 2 years', sessions:'Course of 2–3'},
+  // ── Skin Boosters ──
+  'sb-rejuran': {name:'Rejuran Healer / S / I (Samsung Bioepis)', sub:'Salmon PDRN for skin repair and regeneration', subcat:'Skin Boosters', what:'Rejuran contains polynucleotides (PDRN) derived from salmon DNA that repair damaged skin at a cellular level. Improves elasticity, hydration and accelerates healing.', zones:'Face (under-eyes, acne scars, fine lines), neck, décolleté', results:['Improved skin quality and elasticity','Reduced fine lines and pores','Faster healing of damaged skin'], contra:['Fish or salmon allergy','Pregnancy','Active infections'], before:[['💊','Stop blood thinners 5 days'],['💄','No makeup on day']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+'],['💄','No makeup 24h']], interval:'4 weeks', sessions:'Course of 3–4, maintenance every 6 months'},
+  'sb-profhilo': {name:'Profhilo (IBSA) — Bio-remodelling Agent', sub:'Highest concentration HA — hydration and bioremodelling', subcat:'Skin Boosters', what:'Profhilo contains the highest concentration of pure HA available (64mg/2ml). Unlike fillers, it spreads and remodels the skin from within, stimulating collagen and elastin.', zones:'Face, neck, décolleté, hands, inner arms, abdomen', results:['Intense lasting hydration','Stimulated collagen and elastin','Improved skin laxity and quality'], contra:['Known HA allergy','Pregnancy','Active infections'], before:[['💊','Stop blood thinners 5 days'],['💄','No makeup']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+'],['😊','No massage 24h']], interval:'4 weeks between 2 sessions, maintenance every 6 months', sessions:'2 sessions, then maintenance'},
+  'sb-jalupro': {name:'Jalupro (Classic, Super Hydro, Young Eye)', sub:'Amino acid and HA bio-revitalisation', subcat:'Skin Boosters', what:'Jalupro combines amino acids (glycine, L-proline, L-leucine, L-lysine) with HA to bio-revitalise skin from within. Stimulates fibroblasts for natural collagen production.', zones:'Face, neck, décolleté, under-eyes (Young Eye), hands', results:['Improved skin quality and hydration','Stimulated natural collagen','Reduced fine lines and dullness'], contra:['Active infections','Known allergy to components','Pregnancy'], before:[['💊','Stop blood thinners 5 days'],['💄','No makeup']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 3–4, maintenance every 6 months'},
+  'sb-rrs': {name:'RRS HA Long Lasting', sub:'Cocktail of HA + vitamins + minerals', subcat:'Skin Boosters', what:'RRS HA Long Lasting is an injectable cocktail of cross-linked HA with vitamins, minerals and antioxidants. Provides lasting hydration and overall skin quality improvement.', zones:'Face, neck, décolleté, hands', results:['Long-lasting deep hydration','Improved skin tone and texture','Antioxidant protection'], contra:['Pregnancy','Active infections','Known allergy to components'], before:[['💊','Stop blood thinners 5 days'],['💄','No makeup']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'4–6 weeks', sessions:'Course of 3–4'},
+  // ── Mesotherapy & PRP ──
+  'meso-bcn': {name:'Mesotherapy — BCN Protocols', sub:'Customised cocktails for face and scalp', subcat:'Mesotherapy', what:'BCN mesotherapy delivers customised cocktails of vitamins, minerals, amino acids and HA directly into the skin. Tailored protocols for hydration, pigmentation, hair loss and rejuvenation.', zones:'Face, neck, décolleté, scalp (hair loss), body', results:['Improved skin quality and hydration','Reduced pigmentation and fine lines','Stimulated hair growth (scalp protocol)'], contra:['Pregnancy','Active infections','Known allergy to components','Blood thinners'], before:[['💊','Stop blood thinners 5 days'],['💄','No makeup']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+'],['💄','No makeup 24h']], interval:'2–4 weeks during course, monthly maintenance', sessions:'Course of 4–6'},
+  'prp': {name:'PRP — Platelet-Rich Plasma Therapy', sub:'Your own growth factors for skin and hair regeneration', subcat:'PRP', what:'PRP (Platelet-Rich Plasma) uses your own blood — centrifuged to concentrate growth factors — injected back into skin or scalp. Stimulates natural collagen and hair follicle regeneration.', zones:'Face, neck, décolleté, under-eyes, scalp (hair loss)', results:['Stimulated collagen and elastin','Improved skin quality and texture','Hair growth stimulation (scalp)','100% natural — your own biology'], contra:['Blood disorders or anticoagulant therapy','Active infections','Low platelet count'], before:[['💊','Stop blood thinners 7 days (consult doctor)'],['🍷','No alcohol 24h'],['💧','Hydrate well the day before']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+'],['💄','No makeup 24h'],['🏋️','No intense exercise 24h']], interval:'4–6 weeks during course, maintenance every 6 months', sessions:'Course of 3, then maintenance'},
+  // ── Threads ──
+  'threads-pdo': {name:'PDO Thread Lift', sub:'Non-surgical lifting with absorbable threads', subcat:'Thread Lift', what:'PDO (polydioxanone) threads are inserted under the skin to mechanically lift sagging tissue and stimulate collagen production. Results appear immediately and improve over 3–6 months as collagen forms.', zones:'Brows, cheeks, jowls, neck, nose (rhinoplasty effect), body', results:['Immediate visible lifting','Collagen stimulation for 12–18 months','Improved skin quality'], contra:['Pregnancy','Active infections','Blood thinners','Autoimmune conditions'], before:[['💊','Stop blood thinners 7 days'],['💄','No makeup'],['🍷','No alcohol 24h']], after:[['😊','Sleep on your back for 2 weeks'],['🚿','No facial massages 4 weeks'],['🏋️','No strenuous exercise 1 week'],['💄','No makeup 48h']], interval:'12–18 months', sessions:'Single session, touch-up as needed'},
+  // ── FOTONA ──
+  'ft-3d4d': {name:'FOTONA 3D/4D Lifting', sub:'Non-surgical laser facelift — two wavelengths', subcat:'FOTONA', what:'FOTONA 4D combines four laser passes using Er:YAG and Nd:YAG wavelengths to address all layers of skin ageing — from deep tissue tightening to superficial resurfacing. Zero downtime.', zones:'Face, neck, jawline, décolleté', results:['Immediate tightening and lifting','Collagen stimulation 3–6 months post-treatment','Improved skin texture and tone'], contra:['Pregnancy','Active skin infections','Extreme photosensitivity','Recent filler (consult specialist)'], before:[['💄','No makeup'],['🧴','No actives 5 days'],['☀️','No sun 2 weeks']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+ essential'],['🚿','No heat 48h']], interval:'4–6 weeks', sessions:'Course of 3–4, annual maintenance'},
+  'ft-smootheye': {name:'FOTONA SmoothEye', sub:'Non-surgical eyelid tightening', subcat:'FOTONA', what:'SmoothEye uses gentle Er:YAG laser pulses to tighten lax eyelid skin and reduce fine lines around the eyes without surgery. Comfortable and effective.', zones:'Upper and lower eyelids, periorbital area', results:['Tighter eyelid skin','Reduced under-eye lines','More open, refreshed eye appearance'], contra:['Active eye infections','Glaucoma','Recent eye surgery'], before:[['💄','No eye makeup'],['👁️','Remove contact lenses']], after:[['💧','Gentle eye cream'],['☀️','SPF 50+ and sunglasses']], interval:'4–6 weeks', sessions:'Course of 3'},
+  'ft-lightpeel': {name:'FOTONA LightPeel / Pixel Er:YAG', sub:'Laser skin resurfacing with minimal downtime', subcat:'FOTONA', what:'Fractional Er:YAG laser resurfacing for skin texture, fine lines and superficial pigmentation. Creates micro-channels that trigger the skin\'s natural repair response.', zones:'Face, neck, décolleté, hands', results:['Smoother texture','Reduced fine lines and pores','More even skin tone'], contra:['Pregnancy','Active infections','Extreme photosensitivity','Roaccutane (12+ months)'], before:[['🧴','Stop actives 5–7 days'],['☀️','No sun 2 weeks']], after:[['💧','Prescribed post-treatment cream'],['☀️','SPF 50+ essential'],['💄','No makeup 48h'],['🚿','Lukewarm water only 48h']], interval:'4–6 weeks', sessions:'Course of 3–4'},
+  'ft-genesis': {name:'FOTONA Genesis — Redness and Rosacea', sub:'Vascular reduction and skin tone evening', subcat:'FOTONA', what:'Nd:YAG Genesis laser targets superficial blood vessels causing redness and rosacea. Non-ablative, comfortable treatment with no downtime.', zones:'Face, neck', results:['Reduced redness and flushing','Improved skin tone','Calmer skin'], contra:['Pregnancy','Active skin infections','Extreme photosensitivity'], before:[['💄','No makeup'],['☀️','No sun 2 weeks']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'3–4 weeks', sessions:'Course of 4–6'},
+  'ft-veins': {name:'FOTONA — Veins and Capillaries', sub:'Laser treatment of spider veins and broken capillaries', subcat:'FOTONA', what:'Nd:YAG laser selectively targets haemoglobin in superficial vessels, causing them to coagulate and be absorbed by the body. Effective on spider veins and broken capillaries.', zones:'Face, legs, body', results:['Eliminated superficial veins and capillaries','Clearer skin','Immediate improvement'], contra:['Pregnancy','Blood clotting disorders','Active infections at site'], before:[['☀️','No sun 2 weeks'],['💊','Stop blood thinners 7 days']], after:[['☀️','SPF 50+'],['🚿','No heat 48h'],['🏋️','No intense exercise 48h']], interval:'4–6 weeks', sessions:'1–3 sessions'},
+  'ft-liplase': {name:'FOTONA LipLase — Volume Without Injections', sub:'Laser lip plumping and rejuvenation', subcat:'FOTONA', what:'Er:YAG laser stimulates collagen in the lips and perioral area, creating natural volume and reducing fine lip lines. A non-injectable alternative to lip fillers.', zones:'Lips, perioral area', results:['Natural lip plumping','Reduced lip lines','Improved lip texture'], contra:['Active herpes','Pregnancy','Extreme lip sensitivity'], before:[['💊','Antiviral if herpes history'],['💄','No lip makeup']], after:[['💧','Nourishing lip balm'],['☀️','SPF lip balm']], interval:'4–6 weeks', sessions:'Course of 3'},
+  'ft-nightlase': {name:'FOTONA NightLase — Snoring and Sleep Apnoea', sub:'Non-invasive laser treatment for snoring', subcat:'FOTONA', what:'NightLase uses gentle Er:YAG laser energy to tighten the soft palate and reduce the effects of sleep apnoea and snoring. Completely non-invasive.', zones:'Oral mucosa, soft palate', results:['Reduced snoring intensity','Improved sleep quality','Non-invasive, comfortable'], contra:['Severe sleep apnoea (requires CPAP)','Active oral infections','Pregnancy'], before:[['🦷','Oral hygiene on the day']], after:[['💧','Drink water']], interval:'3–4 weeks', sessions:'Course of 3'},
+  'ft-hair': {name:'FOTONA HAIRestart — Hair Loss', sub:'Laser stimulation for hair growth', subcat:'FOTONA', what:'Nd:YAG laser stimulates blood flow to hair follicles and promotes growth factors. Effective for androgenetic alopecia and general hair thinning.', zones:'Scalp', results:['Reduced hair loss','Stimulated new hair growth','Thicker, stronger hair'], contra:['Active scalp infections','Extreme photosensitivity','Pregnancy (as precaution)'], before:[['🚿','Wash hair on the day'],['💄','No hair products']], after:[['🚿','Avoid washing hair 24h'],['☀️','Protect scalp from sun']], interval:'4 weeks', sessions:'Course of 6–8, maintenance monthly'},
+  'ft-removal': {name:'FOTONA — Skin Tag and Lesion Removal', sub:'Laser removal of benign skin lesions', subcat:'FOTONA', what:'Er:YAG or Nd:YAG laser precisely ablates benign skin lesions — moles, skin tags, warts, sebaceous cysts, keratoses — with minimal scarring.', zones:'Face, neck, body', results:['Complete removal of benign lesions','Minimal scarring','Fast healing'], contra:['Suspicious or undiagnosed lesions (dermatologist assessment first)','Pregnancy','Blood thinners'], before:[['🩺','Dermatologist assessment to confirm benign lesion'],['💄','No makeup on area']], after:[['💧','Prescribed healing cream'],['☀️','SPF 50+ once healed'],['🚿','Keep dry 48h']], interval:'Single session per lesion', sessions:'As needed'},
+  // ── CO2 & RF ──
+  'co2-laser': {name:'CO2 Laser Resurfacing', sub:'Ablative resurfacing for deep wrinkles and acne scars', subcat:'CO2 Laser', what:'CO2 laser is the gold standard for significant skin resurfacing — deep wrinkles, acne scars, skin laxity and photoageing. Fractional or full ablative options available.', zones:'Face, neck, décolleté, hands', results:['Significant reduction of wrinkles and scars','Stimulated collagen remodelling','Improved skin texture and tone'], contra:['Pregnancy','Roaccutane (12+ months)','Dark skin tones (hyperpigmentation risk)','Active infections','Extreme photosensitivity'], before:[['🧴','Stop all actives 2 weeks'],['☀️','Strict sun avoidance 4 weeks'],['💊','Antiviral prophylaxis if history of herpes']], after:[['💧','Prescribed post-laser protocol'],['☀️','SPF 50+ essential — strict sun avoidance'],['💄','No makeup until fully healed'],['🚿','Gentle lukewarm water only']], interval:'Annual or as needed', sessions:'1–2 sessions'},
+  'morpheus8-face': {name:'Morpheus8 — RF Microneedling (Face)', sub:'Deep remodelling of skin and subcutaneous tissue', subcat:'Morpheus8', what:'Morpheus8 combines fractional microneedling with bipolar radiofrequency energy delivered deep into the dermis. Remodels fat and stimulates collagen for significant lifting and tightening.', zones:'Face, jowls, neck, under-eyes, forehead, nasolabial folds', results:['Significant skin tightening and lifting','Remodelled fat distribution','Stimulated collagen — results at 3–6 months'], contra:['Pregnancy','Active skin infections','Metal implants in face','Pacemaker'], before:[['💊','Stop blood thinners 5 days'],['🧴','Stop actives 5 days'],['☀️','No sun 2 weeks'],['💊','Antiviral if herpes history']], after:[['💧','Prescribed healing cream'],['☀️','SPF 50+ essential'],['💄','No makeup 48h'],['🚿','No heat 72h']], interval:'4–6 weeks', sessions:'Course of 3'},
+  'morpheus8-body': {name:'Morpheus8 Body — RF Microneedling (Body)', sub:'Body remodelling, fat reduction and skin tightening', subcat:'Morpheus8', what:'Morpheus8 Body uses longer needles to penetrate deeper fat layers. Remodels stubborn fat, tightens loose skin and reduces cellulite on body areas.', zones:'Abdomen, inner thighs, arms, buttocks, knees', results:['Reduced localised fat','Tighter skin','Reduced cellulite appearance'], contra:['Pregnancy','Active infections','Pacemaker','Metal implants in area'], before:[['💊','Stop blood thinners 5 days'],['☀️','No sun on treated area 2 weeks']], after:[['💧','Prescribed cream'],['☀️','SPF if exposed'],['🏋️','Avoid exercise 48h']], interval:'4–6 weeks', sessions:'Course of 3'},
+  'hifu': {name:'HIFU — High-Intensity Focused Ultrasound', sub:'Non-surgical facelift — deep tissue lifting', subcat:'HIFU', what:'HIFU targets the SMAS layer (the same layer addressed in surgical facelifts) using focused ultrasound. Triggers collagen contraction and long-term collagen production.', zones:'Face, neck, jawline, décolleté, brow lift', results:['Visible lifting of face and neck','Tightened skin contour','Results build over 3–6 months, last 12–24 months'], contra:['Pregnancy','Active infections','Metal implants in area','Severe skin laxity (consider surgery)'], before:[['💄','No makeup'],['💊','Painkiller 30 min before if sensitive']], after:[['💧','Gentle moisturiser'],['☀️','SPF 50+']], interval:'12–24 months', sessions:'1–2 sessions'},
+  'thermage': {name:'Thermage FLX', sub:'Radiofrequency skin tightening — gold standard', subcat:'Thermage', what:'Thermage FLX uses monopolar radiofrequency to heat the deep dermis and stimulate long-term collagen production. The gold standard for non-invasive skin tightening.', zones:'Face, eyelids, neck, décolleté, body', results:['Significant skin tightening','Results develop over 6 months','Long-lasting — 1–2 years'], contra:['Pregnancy','Pacemaker','Metal implants in area','Active infections'], before:[['💄','No makeup'],['💊','Painkiller if desired']], after:[['💧','Rich moisturiser'],['☀️','SPF 50+']], interval:'12–24 months', sessions:'Single session'},
+  // ── Body Treatments ──
+  'rf-body': {name:'RF Body — Fat Reduction and Tightening', sub:'Radiofrequency for body contouring', subcat:'Body RF', what:'Radiofrequency energy heats subcutaneous fat cells and stimulates collagen in overlying skin. Reduces localised fat deposits and improves skin laxity simultaneously.', zones:'Abdomen, thighs, arms, buttocks, back', results:['Reduced localised fat','Tighter skin','Reduced cellulite appearance'], contra:['Pregnancy','Pacemaker','Metal implants in area','Active infections'], before:[['💧','Hydrate well'],['💄','No creams or oils on area']], after:[['💧','Hydrate well'],['🏋️','Light exercise encouraged']], interval:'1–2 weeks', sessions:'Course of 6–10'},
+  'endosphere': {name:'Endosphere Therapy', sub:'Deep mechanical massage for body and face', subcat:'Body Treatments', what:'Endosphere uses a rotating sphere device to deliver deep compressive microvibration. Reduces cellulite, stimulates lymphatic drainage and contours the body.', zones:'Body (abdomen, thighs, buttocks, arms), face and neck', results:['Reduced cellulite','Improved lymphatic drainage','Body contouring and skin tightening'], contra:['Pregnancy','Active infections or inflammation','Deep vein thrombosis','Recent surgery'], before:[['💧','Hydrate well'],['💄','No creams or oils']], after:[['💧','Drink at least 1.5L water'],['🏋️','Light walking encouraged']], interval:'Weekly', sessions:'Course of 10–15'},
+  'kriolip': {name:'Cryolipolysis', sub:'Non-surgical fat freezing', subcat:'Body Treatments', what:'Cryolipolysis (fat freezing) uses controlled cooling to crystallise and destroy fat cells without damaging surrounding tissue. Fat cells are gradually eliminated by the body over 2–4 months.', zones:'Abdomen, flanks, inner thighs, chin, back rolls, arms', results:['20–25% fat reduction per session','Permanent fat cell elimination','Results visible at 8–12 weeks'], contra:['Pregnancy','Cryoglobulinaemia','Cold urticaria','Raynaud\'s disease'], before:[['💄','No creams on area'],['💧','Hydrate well']], after:[['😊','Massage treated area encouraged'],['🏋️','Normal activity immediately']], interval:'8–12 weeks between sessions on same area', sessions:'1–3 sessions per area'},
+  'lymph': {name:'Lymphatic Drainage', sub:'Manual or device-assisted lymph stimulation', subcat:'Body Treatments', what:'Lymphatic drainage uses gentle rhythmic movements (manual) or pressotherapy to stimulate lymph flow, reduce swelling and eliminate toxins.', zones:'Full body, face, legs', results:['Reduced swelling and puffiness','Improved circulation and immunity','Detoxification'], contra:['Active cancer','Deep vein thrombosis','Active infections','Heart failure'], before:[['💧','Hydrate well'],['💄','No creams']], after:[['💧','Drink 1.5–2L water'],['🏋️','Light activity encouraged']], interval:'Weekly or as needed', sessions:'Course of 6–10, ongoing maintenance'},
+  'pressotherapy': {name:'Pressotherapy', sub:'Pneumatic compression for lymphatic drainage', subcat:'Body Treatments', what:'Pressotherapy uses an inflatable suit with sequential pneumatic compression to accelerate lymphatic drainage and venous return. Reduces water retention and improves circulation.', zones:'Legs, abdomen, arms', results:['Reduced water retention and swelling','Improved venous return','Lighter, more toned legs'], contra:['Deep vein thrombosis','Active infections','Heart failure','Pregnancy (first trimester)'], before:[['💧','Hydrate well']], after:[['💧','Drink water'],['🏋️','Light walking encouraged']], interval:'Weekly', sessions:'Course of 6–10'},
+  // ── Dermatology ──
+  'derm-consult': {name:'Dermatological Consultation', sub:'Diagnosis, dermoscopy, individualised treatment plan', subcat:'Dermatology Consultations', what:'Comprehensive skin assessment using dermoscope, Wood\'s lamp and VISIA analyser. Individualised treatment plan for skin conditions, suspicious lesions and preventive care.', zones:'Face, body, scalp, nails', results:['Clear diagnosis and treatment plan','Early detection of skin conditions','Personalised product and procedure recommendations'], contra:[], before:[['🧴','No makeup for more accurate assessment']], after:[['📋','Follow the specialist\'s recommendations'],['📸','Document with photos']], interval:'6–12 months', sessions:'As required'},
+  'derm-acne': {name:'Acne — Dermatological Treatment', sub:'Clinical treatment for mild to severe acne', subcat:'Dermatology Treatments', what:'Medical approach to acne combining topical treatments, oral medications, chemical peels and energy-based devices. Tailored to acne type, severity and skin type.', zones:'Face, back, chest, shoulders', results:['Cleared active breakouts','Reduced acne scarring','Long-term remission with maintenance'], contra:['Pregnancy (certain medications)','Known drug allergies'], before:[['💄','No makeup to consultation'],['📋','List all current medications']], after:[['☀️','SPF 50+ daily (most treatments increase photosensitivity)'],['💧','Gentle non-comedogenic moisturiser'],['🚫','No picking or squeezing']], interval:'4–6 weeks between appointments', sessions:'Ongoing — as directed by dermatologist'},
+  'derm-rosacea': {name:'Rosacea — Dermatological Treatment', sub:'Medical management of rosacea and facial redness', subcat:'Dermatology Treatments', what:'Evidence-based rosacea management using topical and oral treatments combined with laser or IPL therapy. Targets triggers, reduces redness and prevents progression.', zones:'Face (cheeks, nose, forehead, chin)', results:['Reduced persistent redness and flushing','Cleared papules and pustules','Improved skin comfort'], contra:['Known drug allergies','Pregnancy (certain medications)'], before:[['💄','No makeup to consultation'],['📋','Note your triggers (sun, spicy food, alcohol, exercise)']], after:[['☀️','SPF 50+ daily — essential'],['🌡️','Avoid heat triggers'],['🧴','Gentle fragrance-free skincare only']], interval:'4–6 weeks between appointments', sessions:'Ongoing management'},
 };
 
 // Helper: get localized proc data
@@ -1829,7 +2006,7 @@ function showSuggestions(){
   box.innerHTML = matches.map(p=>{
     const lp = procL(p);
     return `<div class="suggestion-item" onmousedown="selectSuggestion('${p.id}')">
-      ${procCircleIcon(lp.name, p.fg||'#b8966a', 32)}
+      ${procCircleIcon(lp.name, '#b8966a', 32)}
       <div style="flex:1;min-width:0">
         <div class="suggestion-name">${lp.name}</div>
         <div class="suggestion-sub">${lp.sub||''}</div>
@@ -1879,7 +2056,7 @@ function renderProcs(){
     const lp=procL(p);
     const isFav=favIds.includes(p.id);
     return `<div class="proc-row" onclick="openSheet('${p.id}')">
-      ${procCircleIcon(lp.name, p.fg||'#b8966a', 42)}
+      ${procCircleIcon(lp.name, '#b8966a', 42)}
       <div class="proc-row-info">
         <div class="proc-row-name">${lp.name}</div>
         <div class="proc-row-sub">${lp.sub}</div>
@@ -1919,7 +2096,7 @@ async function openSheet(id){
   const p=PROCS.find(x=>x.id===id);if(!p)return;
   const lp=procL(p);
   currentProcId=id;pendingPhotos=[];
-  document.getElementById('sh-icon').innerHTML=procCircleIcon(lp.name, p.fg||'#b8966a', 44).replace('border-radius:50%','border-radius:12px');
+  document.getElementById('sh-icon').innerHTML=procCircleIcon(lp.name, '#b8966a', 44).replace('border-radius:50%','border-radius:12px');
   document.getElementById('sh-icon').style.background='rgba(184,150,106,0.08)';
   const catLabel = (window._lang==='en' && CATS_EN[p.cat]) ? CATS_EN[p.cat] : (CATS_LIST.find(c=>c.id===p.cat)?.label||p.cat);
   document.getElementById('sh-cat').textContent=catLabel;
@@ -2011,7 +2188,7 @@ async function openSheet(id){
     </div>
 
     ${window._user?`<div class="diary-section">
-      <div class="diary-section-title">Моят <em>дневник</em></div>
+      <div class="diary-section-title">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div>
       <div id="de-entries-list">${diaryEntriesHTML}</div>
       <button onclick="toggleNewEntry()" id="new-entry-btn" style="width:100%;margin-top:10px;padding:14px;background:linear-gradient(135deg,rgba(184,150,106,.1),rgba(212,169,106,.08));border:1.5px solid var(--gold);border-radius:14px;color:var(--gold);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;letter-spacing:.02em">
         ✦ ${t('newEntry')} ${fmtDate(new Date())}
@@ -2328,7 +2505,7 @@ async function loadDiaryTab(){
             <button onclick="moveDiaryGroup('${pid}',-1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▲</button>
             <button onclick="moveDiaryGroup('${pid}',1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▼</button>
           </div>`:'<div style="width:28px"></div>'}
-          ${isRoutine ? `<div class="diary-group-icon" style="background:${bg}">${icon}</div>` : procCircleIcon(_dlp?.name||g.name, _dp?.fg||'#b8966a', 38)}
+          ${isRoutine ? `<div class="diary-group-icon" style="background:${bg}">${icon}</div>` : procCircleIcon(_dlp?.name||g.name, '#b8966a', 38)}
           <div class="diary-group-info" onclick="event.stopPropagation();if(!isRoutine)openSheet('${pid}')" style="${!isRoutine?'cursor:pointer':''}">
             <div class="diary-group-name" style="${!isRoutine?'color:var(--gold)':''}">${name}${!isRoutine?'  ›':''}</div>
             <div class="diary-group-meta">${t('notifLast')||'Последно'}: ${lastDate}</div>
@@ -2548,7 +2725,7 @@ function addAiMsg(role,html){
   return div;
 }
 function showAiSuggestions(arr){
-  document.getElementById('ai-suggestions').innerHTML=arr.map(s=>`<button class="ai-sug-btn" onclick="pickSuggestion('${s.replace(/'/g,"\'")}')"> ${s}</button>`).join('');
+  document.getElementById('ai-suggestions').innerHTML=arr.map(s=>`<button class="ai-sug-btn" onclick="pickSuggestion('${s.replace(/'/g,"'")}')"> ${s}</button>`).join('');
 }
 function pickSuggestion(txt){
   document.getElementById('ai-input').value=txt;
@@ -2567,7 +2744,7 @@ async function sendAiMsg(){
   loadDiv.classList.add('loading');
   document.getElementById('ai-send-btn').disabled=true;
   // Find proc data
-  const proc=window.PROCS?window.PROCS.find(p=>p.id===_aiProcId):null;
+  const proc=window.PROCS?(window.PROCS||[]).find(p=>p.id===_aiProcId):null;
   const procContext=proc?`Процедура: ${proc.name}. ${proc.what||''} Зони: ${proc.zones||''}. Резултати: ${(proc.results||[]).join(', ')}. Противопоказания: ${(proc.contra||[]).join(', ')}.`:'';
   const systemPrompt=t('aiSystem')+' Procedure context: '+procContext;
   try{
@@ -2728,7 +2905,7 @@ function saveNotifDate(){
   const dt = new Date(d + 'T' + time);
   const diff = Math.ceil((new Date(d) - new Date()) / 86400000);
   const info = document.getElementById('notif-info');
-  if(diff >= 0) info.textContent = '✅ ' + procName + ' — ' + new Date(d).toLocaleDateString('bg-BG') + ' в ' + time;
+  if(diff >= 0) info.textContent = '✅ ' + procName + ' — ' + new Date(d).toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG') + (window._lang==='en'?' at ':' в ') + time;
   else info.textContent = '⚠️ Датата е в миналото';
   showToast(t('toastNotifSaved'));
   document.getElementById('notif-date').value = '';
@@ -2772,7 +2949,7 @@ function loadProfileStats(){
         if(lastBox&&lastName&&lastDate){
           lastName.textContent = (last.procIcon||'✦')+' '+(last.procName||'—');
           const d = last.createdAt?.toDate?.();
-          if(d) lastDate.textContent = d.toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
+          if(d) lastDate.textContent = d.toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG',{day:'numeric',month:'long',year:'numeric'});
           lastBox.style.display='block';
         }
       }
@@ -2929,7 +3106,7 @@ function loadFavsList(){
     const removeTitle = t('toastFavRem');
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--goldlt)">
       <div onclick="openSheet('${id}')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer">
-        ${procCircleIcon(lp.name, p.fg||'#b8966a', 38)}
+        ${procCircleIcon(lp.name, '#b8966a', 38)}
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lp.name}</div>
           <div style="font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lp.sub}</div>
@@ -2980,7 +3157,7 @@ function loadNotifProcSelector(){
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#faf8f5;border-radius:10px;border:1px solid var(--goldlt)">
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:600;color:var(--ink1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n.procName}</div>
-            <div style="font-size:10px;color:${color};margin-top:1px">${dt.toLocaleDateString('bg-BG')} ${n.time?'в '+n.time:''} · ${diffTxt}</div>
+            <div style="font-size:10px;color:${color};margin-top:1px">${dt.toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG')} ${n.time?(window._lang==='en'?'at ':' в ')+n.time:''} · ${diffTxt}</div>
           </div>
           <button onclick="editNotif('${n.id}')" style="background:none;border:1px solid var(--goldlt);border-radius:6px;color:var(--gold);cursor:pointer;font-size:11px;padding:3px 7px;white-space:nowrap">✏️</button>
           <button onclick="deleteNotif('${n.id}')" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:2px">✕</button>
@@ -3093,7 +3270,7 @@ function checkReminders(){
               <span style="font-size:20px">🔔</span>
               <div style="flex:1">
                 <div style="font-size:12px;font-weight:700;color:var(--ink1)">${n.procName}</div>
-                <div style="font-size:11px;color:${color}">${nd.toLocaleDateString('bg-BG')} ${n.time?'в '+n.time:''} · ${diffTxt}</div>
+                <div style="font-size:11px;color:${color}">${nd.toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG')} ${n.time?(window._lang==='en'?'at ':' в ')+n.time:''} · ${diffTxt}</div>
               </div>
             </div>`;
           }).join('')}
@@ -3117,7 +3294,7 @@ async function updateRoutineStreak(checked, today){
   const total = document.querySelectorAll('.routine-cb').length + 
                 document.querySelectorAll('.routine-cb-custom').length;
   const allChecked = checked.length >= total && total > 0;
-  const todayFmt = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const todayFmt = new Date().toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG', {day:'numeric', month:'long', year:'numeric'});
   
   if(allChecked){
     localStorage.setItem('gt_routine_last_date', today);
@@ -3163,7 +3340,7 @@ async function updateRoutineStreak(checked, today){
   } else {
     const lastDate = localStorage.getItem('gt_routine_last_date');
     if(lastDate && lastDate !== today){
-      const lastFmt = new Date(lastDate).toLocaleDateString('bg-BG', {day:'numeric', month:'long'});
+      const lastFmt = new Date(lastDate).toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG', {day:'numeric', month:'long'});
       streak.innerHTML = `<span style="font-size:10px;color:var(--ink2)">Последно изпълнена: ${lastFmt}</span><br><span style="font-size:10px;color:var(--sage)">✨ Нов ден — маркирай рутината!</span>`;
     } else {
       streak.innerHTML = `<span style="font-size:10px;color:var(--ink2)">Маркирай стъпките за днес · ${todayFmt}</span>`;
@@ -3444,7 +3621,7 @@ async function saveRoutine(type){
 function updateCareStreak(type, checked, today){
   const el = document.getElementById(type+'-streak');
   if(!el) return;
-  const todayFmt = new Date().toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
+  const todayFmt = new Date().toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG',{day:'numeric',month:'long',year:'numeric'});
   const total = document.querySelectorAll('.routine-cb-'+type).length +
                 document.querySelectorAll('.routine-cb-'+type+'-custom').length;
   // Update progress bar
@@ -3453,7 +3630,7 @@ function updateCareStreak(type, checked, today){
   if(checked.length === 0){
     const last = localStorage.getItem('gt_care_'+type+'_last');
     if(last && last !== today){
-      el.innerHTML = `<span style="color:var(--ink2)">Последно: ${new Date(last).toLocaleDateString('bg-BG',{day:'numeric',month:'long'})}</span>`;
+      el.innerHTML = `<span style="color:var(--ink2)">${window._lang==='en'?'Last: ':'Последно: '}${new Date(last).toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG',{day:'numeric',month:'long'})}</span>`;
     } else {
       el.innerHTML = `<span style="color:var(--ink2)">Маркирай стъпките · ${todayFmt}</span>`;
     }
@@ -3642,7 +3819,7 @@ async function exportDiaryCSV(){
       .sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0))
       .map(d=>{
         const e = d.data();
-        const dt = e.createdAt?.toDate?.() ? e.createdAt.toDate().toLocaleDateString('bg-BG') : '';
+        const dt = e.createdAt?.toDate?.() ? e.createdAt.toDate().toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG') : '';
         const esc = v => '"'+(String(v||'').replace(/"/g,'""'))+'"';
         const pName = e.procName || window.PROCS?.find(x=>x.id===e.procId)?.name || e.procId || '';
         return [dt,pName,e.clinic,e.specialist,e.advice,e.feeling,e.products,e.price||'',e.rating||''].map(esc).join(',');
@@ -3809,7 +3986,7 @@ function calcNextDate(){
     const dt = new Date(lastDate);
     const minNext = new Date(dt); minNext.setDate(dt.getDate()+minDays);
     const maxNext = new Date(dt); maxNext.setDate(dt.getDate()+maxDays);
-    const fmt = d => d.toLocaleDateString('bg-BG',{day:'numeric',month:'long'});
+    const fmt = d => d.toLocaleDateString(window._lang==='en'?'en-GB':'bg-BG',{day:'numeric',month:'long'});
     result.innerHTML = `🗓️ Следваща: <span style="color:var(--gold)">${fmt(minNext)} — ${fmt(maxNext)}</span>`;
     
     // Suggest adding reminder
@@ -3872,25 +4049,12 @@ window.addEventListener('offline', ()=>showToast(t('offline'), 4000));
 if(!navigator.onLine) showToast(t('offline'), 4000);
 
 // ── SERVICE WORKER ──
-if('serviceWorker' in navigator){
-  const swCode=`
-const CACHE='glowtrack-v1';
-const ASSETS=['/glowtrack/','/glowtrack/index.html'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{})));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  e.respondWith(fetch(e.request).then(r=>{
-    if(r&&r.status===200&&r.type==='basic'){
-      const rc=r.clone();
-      caches.open(CACHE).then(c=>c.put(e.request,rc));
-    }
-    return r;
-  }).catch(()=>caches.match(e.request)));
-});`;
-  const blob=new Blob([swCode],{type:'application/javascript'});
-  const url=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url,{scope:'/glowtrack/'}).catch(()=>{});
+// Note: blob: URL registration not supported in Safari
+// SW must be registered from a dedicated sw.js file on same origin
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  try{
+    navigator.serviceWorker.register('/glowtrack/sw.js',{scope:'/glowtrack/'}).catch(()=>{});
+  }catch(e){}
 }
 
 document.addEventListener('keydown',e=>{
