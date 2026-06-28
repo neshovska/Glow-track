@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="GlowTrack · Know your glow.">
 <meta name="twitter:description" content="80+ козметични процедури, личен дневник и напомняния.">
 <link rel="icon" id="favicon-link" type="image/png" href="">
-<link rel="apple-touch-icon" id="apple-icon-link" href="">
+<link rel="apple-touch-icon" id="apple-icon-link" href="apple-touch-icon.png">
 <script>
 (function(){
   var S=180,R=38,cx=90;
@@ -3987,7 +3987,7 @@ if(!navigator.onLine) showToast(t('offline'), 4000);
 // SW must be registered from a dedicated sw.js file on same origin
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   try{
-    navigator.serviceWorker.register('/glowtrack/sw.js',{scope:'/glowtrack/'}).catch(()=>{});
+    navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(()=>{});
   }catch(e){}
 }
 
