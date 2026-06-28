@@ -120,7 +120,8 @@ body.dark .bnav{background:#1a1a2e!important;border-top:1px solid rgba(212,169,1
 body.dark .sheet,.dark .sheet{background:#1a1a2e}
 body.dark .proc-row{background:#1e1e38;border-color:rgba(212,169,106,.1)}
 body.dark .auth-card{pointer-events:auto;background:rgba(30,30,56,.9)}
-body.dark .form-input,.dark input,.dark textarea,.dark select{background:#252545!important;color:#f0ede8!important;border-color:rgba(212,169,106,.2)!important}
+body.dark .form-input,.dark input,.dark textarea,.dark select{background:#252545!important;color:#f0ede8!important;border-color:rgba(212,169,106,.2)!important;color-scheme:dark}
+body.dark input[type="date"],body.dark input[type="time"],body.dark input[type="datetime-local"]{background:#252545!important;color:#f0ede8!important;color-scheme:dark}
 body.dark .profile-card-section,.dark .profile-card-section{background:#1e1e38;border-color:rgba(212,169,106,.12)}
 body.dark .routine-item{background:#252545}
 body.dark .entry-card{background:#1e1e38;border-color:rgba(212,169,106,.1)}
@@ -311,6 +312,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .form-lbl{font-size:10.5px;font-weight:600;color:var(--ink2);margin-bottom:4px;display:block}
 .form-input{width:100%;padding:9px 11px;border:1.5px solid var(--roselt);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:#fafafa;outline:none;transition:border-color .2s}
 .form-input:focus{border-color:var(--gold);background:#fff}
+body.dark .form-input:focus{background:#252545!important;color:#f0ede8!important}
 .form-input::placeholder{color:#bbb4a8}
 textarea.form-input{resize:none}
 .photo-previews{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
@@ -447,6 +449,8 @@ textarea.form-input{resize:none}
 .empty-ic{font-size:38px;margin-bottom:10px}
 .empty-title{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);margin-bottom:5px}
 .empty-sub{font-size:12px;line-height:1.6}
+body.dark input[type="date"]::-webkit-calendar-picker-indicator,
+body.dark input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(1)}
 </style>
 <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#b8966a">
