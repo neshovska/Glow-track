@@ -133,7 +133,7 @@ body.dark #ptr-indicator{background:#1e1e38;color:var(--gold)}
 body.dark .notif-card{background:#1a1a2e}
 
 body.dark .stat-box{background:#1a1a2e;border-color:rgba(212,169,106,.15)}
-body.dark .diary-group{background:#1e1e38}
+body.dark .diary-group{background:var(--card);border:1.5px solid var(--roselt);border-radius:14px;margin-bottom:10px;overflow:hidden}
 body.dark .entry-card{background:#252545}
 body.dark .acc-body{background:transparent}
 body.dark .info-card{background:#1e1e38}
@@ -457,7 +457,7 @@ body.dark .acc-section{background:#1a1a2e;border-color:rgba(212,169,106,.1)}
 body.dark .acc-header{background:#1a1a2e}
 body.dark .info-card,.dark .info-card{background:#12122a!important}
 body.dark .care-item{background:#12122a;border-color:rgba(212,169,106,.2)}
-body.dark .diary-group{background:#1a1a2e;border-color:rgba(212,169,106,.15)}
+body.dark .diary-group{background:#1a1a2e;border-color:rgba(212,169,106,.2)}
 body.dark .mini-btn{background:#12122a;border-color:rgba(212,169,106,.2);color:#f0ede8}
 body.dark .notif-proc-option{background:#12122a}
 body.dark #notif-proc-dropdown{background:#1a1a2e;border-color:rgba(212,169,106,.2)}
@@ -525,6 +525,8 @@ body.dark input[type="search"]{background:#12122a!important;color:#f0ede8!import
 .cat-btn svg { width:14px;height:14px;flex-shrink:0;transition:stroke .2s }
 .cat-btn.active svg { stroke:var(--gold) }
 body.dark .cat-btn svg { stroke:currentColor }
+.diary-group-entries.open{border-top:1px solid var(--roselt)}
+#diary-tab-content{padding:8px 16px 16px}
 </style>
 <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#b8966a">
@@ -2560,17 +2562,17 @@ async function loadDiaryTab(){
       return`<div class="diary-group" draggable="${!isPinned}" data-pid="${pid}" 
         ondragstart="diaryDragStart(event)" ondragover="diaryDragOver(event)" 
         ondrop="diaryDrop(event)" ondragend="diaryDragEnd(event)">
-        <div class="diary-group-hdr" onclick="toggleGroup('dg-${pid}')">
+        <div class="diary-group-hdr" onclick="toggleGroup('dg-${pid}')" style="justify-content:space-between">
           ${!isPinned?`<div style="display:flex;flex-direction:column;gap:2px;padding:0 6px" onclick="event.stopPropagation()">
             <button onclick="moveDiaryGroup('${pid}',-1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▲</button>
             <button onclick="moveDiaryGroup('${pid}',1)" style="background:none;border:none;color:#c5bdb4;cursor:pointer;font-size:14px;padding:1px;line-height:1">▼</button>
-          </div>`:'<div style="width:28px"></div>'}
+          </div>`:'<div style="width:28px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:12px">📌</div>'}
           ${isRoutine ? `<div class="diary-group-icon" style="background:${bg}">${icon}</div>` : `<div onclick="openSheet('${pid}')" style="cursor:pointer">${procCircleIcon(_dlp?.name||g.name, '#b8966a', 38)}</div>`}
           <div class="diary-group-info" onclick="if(!isRoutine)openSheet('${pid}')" style="${!isRoutine?'cursor:pointer':''}">
             <div class="diary-group-name" style="${!isRoutine?'color:var(--gold)':''}">${name}${!isRoutine?'  ›':''}</div>
             <div class="diary-group-meta">${t('notifLast')||'Последно'}: ${lastDate}</div>
           </div>
-          <span class="diary-group-count">${g.entries.length} ${window._lang==='en'?'entries':'записа'}</span>
+          <span class="diary-group-count">${g.entries.length} ${window._lang==='en'?'entries':'записа'}</span><span class="dg-arrow" id="arr-dg-${pid}" style="font-size:12px;color:var(--ink2);transition:transform .2s;margin-left:6px">⌄</span>
         </div>
         <div class="diary-group-entries" id="dg-${pid}">
           ${g.entries.map(d=>renderEntryCard(d,pid)).join('')}
@@ -2580,7 +2582,14 @@ async function loadDiaryTab(){
     }).join('')}</div>`;
   }catch(e){c.innerHTML=`<div class="loading">${window._lang==='en'?'Error loading':'Грешка при зареждане'}</div>`;}
 }
-function toggleGroup(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
+function toggleGroup(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const isOpen=el.classList.contains('open');
+  el.classList.toggle('open');
+  const arr=document.getElementById('arr-'+id);
+  if(arr)arr.style.transform=isOpen?'':'rotate(180deg)';
+}
 
 // ── CLINICS TAB ──
 let allClinics=[];
