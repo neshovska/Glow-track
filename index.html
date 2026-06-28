@@ -324,8 +324,8 @@ textarea.form-input{resize:none}
 .save-btn:active{opacity:.85}
 .save-btn:disabled{opacity:.5}
 .diary-entries{display:flex;flex-direction:column;gap:9px}
-.entry-card{background:var(--card);border-radius:var(--r);border:1px solid rgba(184,150,106,.12);padding:12px 13px;box-shadow:var(--shadow)}
-.entry-date{font-size:9.5px;font-weight:700;color:var(--gold);letter-spacing:.05em;margin-bottom:6px}
+.entry-card{background:var(--card);border-radius:14px;border:1.5px solid var(--roselt);box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden}
+.entry-date{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:0;margin-bottom:0}
 .entry-field{font-size:12px;color:var(--ink);line-height:1.6;margin-bottom:4px}
 .entry-field .lbl{font-weight:700;color:var(--ink2);font-size:10px;letter-spacing:.04em;display:block;margin-bottom:1px}
 .entry-photos{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
@@ -2133,10 +2133,10 @@ async function openSheet(id){
     ${clinicAdsHTML}${productAdsHTML}
     ${window._user?`<div class="diary-section">
       <div class="diary-section-title" style="text-align:center">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div>
-      <div id="de-entries-list">${diaryEntriesHTML}</div>
       <button onclick="toggleNewEntry()" id="new-entry-btn" style="width:100%;margin-top:10px;margin-bottom:0;padding:14px;background:linear-gradient(135deg,rgba(184,150,106,.1),rgba(212,169,106,.08));border:1.5px solid var(--gold);border-radius:14px;color:var(--gold);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;letter-spacing:.02em">
         ✦ ${t('newEntry')} ${fmtDate(new Date())}
       </button>
+      <div id="de-entries-list" style="margin-top:10px">${diaryEntriesHTML}</div>
       <div class="diary-form" id="new-entry-form" style="display:none;margin-top:10px">
         <div class="form-row"><label class="form-lbl">${t('clinic')}</label><input class="form-input" type="text" id="de-clinic" placeholder="" data-ph="clinicPh"></div>
         <div class="form-row"><label class="form-lbl">${t('specialist')}</label><input class="form-input" type="text" id="de-specialist" placeholder="" data-ph="specialistPh"></div>
@@ -2184,8 +2184,12 @@ function renderEntryCard(docSnap, overrideProcId){
   const dt=d.createdAt?.toDate?d.createdAt.toDate():new Date();
   const photos=d.photos||[];
   const isRoutineEntry = d.isRoutine || d.procId==='skin-routine' || (d.procId||'').startsWith('home-care-');
-  return`<div class="entry-card" id="ec-${eid}">
-    <div class="entry-date">📅 ${fmtFull(dt)}</div>
+  return`<div class="entry-card" id="ec-${eid}" style="padding:0;overflow:hidden;border-radius:14px;border:1.5px solid var(--roselt);background:var(--card);margin-bottom:8px">
+    <div onclick="toggleEntryCard('ec-${eid}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer">
+      <div style="font-size:12px;font-weight:600;color:var(--ink)">📅 ${fmtFull(dt)}</div>
+      <div class="entry-toggle-arrow" id="arr-${eid}" style="font-size:14px;color:var(--ink2);transition:transform .2s">⌄</div>
+    </div>
+    <div id="body-${eid}" style="display:none;padding:0 16px 14px;border-top:1px solid var(--roselt)">
     ${!isRoutineEntry&&(d.clinic||d.specialist)?`<div class="entry-field"><span class="lbl">${t('clinicSpecLabel')}</span>${[d.clinic,d.specialist].filter(Boolean).join(' · ')}${d.contact?' · '+d.contact:''}</div>`:''}
     ${d.advice&&!isRoutineEntry?`<div class="entry-field"><span class="lbl">${t('adviceLabel')}</span>${d.advice}</div>`:''}
     ${isRoutineEntry&&d.advice?`<div class="entry-field">${d.advice}</div>`:''}
@@ -2194,7 +2198,8 @@ function renderEntryCard(docSnap, overrideProcId){
     ${d.feeling?`<div class="entry-field"><span class="lbl">${t('feelingLabel')}</span>${d.feeling}</div>`:''}
     ${photos.length?`<div class="entry-photos">${photos.map(ph=>`<img class="entry-photo" src="${ph}" loading="lazy" alt="Снимка от процедура" onclick="openLightbox('${ph}')">`).join('')}</div>`:''}
     ${d.products&&!isRoutineEntry?`<div class="entry-field" style="margin-top:6px"><span class="lbl">${t('productsLabel')}</span><span class="product-chip">${d.products}</span></div>`:''}
-    <div class="entry-actions">
+    </div>
+    <div class="entry-actions" style="padding:0 16px 12px">
       <button class="mini-btn" onclick="startEditEntry('${eid}','${overrideProcId||currentProcId||d.procId}')">${t('editBtn')}</button>
       <button class="mini-btn danger" onclick="deleteEntry('${eid}','${overrideProcId||currentProcId||d.procId}')">${t('deleteEntryBtn')}</button>
     </div>
@@ -2799,6 +2804,14 @@ async function sendPasswordReset(){
 
 
 // ── ACCORDION ──
+function toggleEntryCard(id){
+  const body = document.getElementById('body-'+id.replace('ec-',''));
+  const arr = document.getElementById('arr-'+id.replace('ec-',''));
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(arr) arr.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
 function toggleAcc(el){
   const body = el.nextElementSibling;
   const arrow = el.querySelector('.acc-arrow');
