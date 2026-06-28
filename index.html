@@ -168,7 +168,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 8%,rgba(155,142,196,.1),transparent 55%),radial-gradient(ellipse 50% 60% at 88% 92%,rgba(184,150,106,.08),transparent 50%),#f7f5f2}
 /* AUTH */
 .auth-screen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:linear-gradient(150deg,#12122a 0%,#1e1e38 50%,#2a1e32 100%);overflow-y:auto}
-.auth-screen.hidden{display:none}
+.auth-screen.hidden{display:none;pointer-events:none}
 .auth-logo{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:#fff;letter-spacing:.1em;margin-bottom:4px}
 .auth-logo span{color:var(--gold)}
 .ai-overlay{position:fixed;inset:0;z-index:300;display:none;align-items:flex-end}
@@ -2765,6 +2765,11 @@ function showPremiumMsg(){
 
 // ── SPLASH ──
 window.addEventListener('load', () => {
+  // Force hide splash after 3s regardless of Firebase
+  setTimeout(()=>{
+    const sp=document.getElementById('splash');
+    if(sp&&sp.style.display!=='none'){sp.style.opacity='0';setTimeout(()=>{sp.style.display='none';},500);}
+  },3000);
 
   initDarkMode();
   const splash = document.getElementById('splash');
