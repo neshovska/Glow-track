@@ -982,6 +982,8 @@ onAuthStateChanged(auth,async user=>{
 
 
 <script>
+console.log("Script3: START");
+
 
 const CATS_LIST=[
   {id:'all',label:'Всички',icon:'✦'},
@@ -1700,6 +1702,7 @@ function showComingSoon(){
 }
 
 function goPage(name,btn){
+  console.log("goPage called:", name);
   hideSuggestions();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
@@ -3984,6 +3987,7 @@ document.addEventListener('keydown',e=>{
     if(ep&&ep.style.display==='flex') ep.style.display='none';
   }
 });
+console.log("Script3: END - goPage available:", typeof goPage);
 </script>
 </body>
 </html>
