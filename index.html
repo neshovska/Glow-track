@@ -3213,7 +3213,7 @@ function loadNotifProcSelector(){
 }
 
 function deleteNotif(id){
-  const saved = _lsGet('gt_notifs')||[].filter(n=>n.id!==id);
+  const saved = (_lsGet('gt_notifs')||[]).filter(n=>n.id!==id);
   _lsSet('gt_notifs', saved);
   if(window._user){ try{ F().setDoc(F().doc(DB(),'users',window._user.uid),{notifs:_lsGet('gt_notifs')||[]},{merge:true}).catch(()=>{}); }catch(e){} }
   loadNotifProcSelector();
