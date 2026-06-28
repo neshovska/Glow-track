@@ -165,7 +165,7 @@ body.dark .suggestion-item:hover{background:#1a1a2e;border-color:rgba(212,169,10
 body.dark .skeleton{background:linear-gradient(90deg,#1e1e38 25%,#252545 50%,#1e1e38 75%);background-size:200% 100%}
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-height:100vh;color:var(--ink);overflow-x:hidden}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-height:100vh;color:var(--ink);overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 8%,rgba(155,142,196,.1),transparent 55%),radial-gradient(ellipse 50% 60% at 88% 92%,rgba(184,150,106,.08),transparent 50%),#f7f5f2}
 /* AUTH */
 .auth-screen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:linear-gradient(150deg,#12122a 0%,#1e1e38 50%,#2a1e32 100%);overflow-y:auto}
@@ -224,7 +224,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .logo{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;letter-spacing:.06em;color:var(--ink)}
 .logo span{color:var(--gold)}
 .page{display:none;animation:fadeIn .18s ease}
-.page.active{display:block}
+.page.active{display:block;min-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .page-hdr{padding:20px 18px 14px}
 .page-hdr-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;color:var(--ink)}
@@ -529,6 +529,8 @@ body.dark .cat-btn svg { stroke:currentColor }
 .diary-entry-row{background:var(--card)}
 .diary-entry-row+.diary-entry-row{border-top:1px solid var(--roselt)}
 body.dark .diary-entry-row{background:#1a1a2e}
+body.dark #diary-search{background:#12122a!important;color:#f0ede8!important}
+body.dark #page-diary [style*="position:sticky"]{background:var(--mist)!important}
 </style>
 <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#b8966a">
@@ -621,6 +623,18 @@ window.goPage=goPage;
   </div>
   <div class="page" id="page-diary">
     <div class="page-hdr"><div class="page-hdr-title" data-diary-hdr="1">Моят <em>дневник</em></div><div class="page-hdr-sub">Лична история на процедурите ти</div></div>
+    <div style="padding:0 16px 10px;position:sticky;top:0;z-index:10;background:var(--mist)">
+      <div class="search-wrap" style="padding:0">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="diary-search" class="search-input" 
+          placeholder="Намери извършена процедура..."
+          data-ph="diarySearch"
+          oninput="filterDiaryGroups(this.value)"
+          style="font-size:16px">
+        <button id="diary-search-clear" onclick="document.getElementById('diary-search').value='';filterDiaryGroups('')" 
+          style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink2);font-size:16px">✕</button>
+      </div>
+    </div>
     <div id="diary-tab-content"><div class="skeleton-wrap">
   <div class="sk-card"><div class="skeleton-item sk-row wide"></div><div class="skeleton-item sk-row medium"></div><div class="skeleton-item sk-row short"></div></div>
   <div class="sk-card"><div class="skeleton-item sk-row wide"></div><div class="skeleton-item sk-row medium"></div></div>
@@ -1314,6 +1328,7 @@ const T = {
     newPass: 'Нова парола (по желание)',
     saveBtn2: 'Запази',
     cancelBtn: 'Откажи',
+    diarySearch: 'Намери извършена процедура...',
     notifHint: 'Задай процедура и дата за следващото си посещение.',
     deleteProfileBtn: '🗑️ Изтрий профила',
     searchProcs: 'Търси процедура...',
@@ -1529,6 +1544,7 @@ const T = {
     newPass: 'New password (optional)',
     saveBtn2: 'Save',
     cancelBtn: 'Cancel',
+    diarySearch: 'Find a completed procedure...',
     notifHint: 'Set a procedure and date for your next visit.',
     deleteProfileBtn: '🗑️ Delete profile',
     searchProcs: 'Search procedure...',
@@ -2709,6 +2725,22 @@ async function loadDiaryTab(){
     console.error('Diary error:',e);
     el.innerHTML=`<div class="empty-state"><div class="empty-ic">⚠️</div><div class="empty-title">${window._lang==='en'?'Error loading':'Грешка при зареждане'}</div></div>`;
   }
+}
+
+
+function filterDiaryGroups(q){
+  const clear = document.getElementById('diary-search-clear');
+  if(clear) clear.style.display = q ? 'block' : 'none';
+  const groups = document.querySelectorAll('#diary-sortable .diary-group');
+  const ql = q.toLowerCase().trim();
+  groups.forEach(g => {
+    if(!ql){
+      g.style.display = '';
+      return;
+    }
+    const name = g.querySelector('.diary-group-hdr')?.textContent?.toLowerCase()||'';
+    g.style.display = name.includes(ql) ? '' : 'none';
+  });
 }
 
 function toggleGroup(id){
