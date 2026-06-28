@@ -122,7 +122,7 @@ body.dark .proc-row{background:#1a1a2e;border-color:rgba(212,169,106,.15)}
 body.dark .auth-card{pointer-events:auto;background:rgba(30,30,56,.9)}
 body.dark .form-input,.dark input,.dark textarea,.dark select{background:#12122a!important;color:#f0ede8!important;border-color:rgba(212,169,106,.25)!important;color-scheme:dark}
 body.dark input[type="date"],body.dark input[type="time"],body.dark input[type="datetime-local"]{background:#12122a!important;color:#f0ede8!important;color-scheme:dark}
-body.dark .profile-card-section,.dark .profile-card-section{background:#1a1a2e;border-color:rgba(212,169,106,.15)}
+body.dark .profile-card-section,.dark .profile-card-section{background:#1a1a2e;border-color:rgba(212,169,106,.15);overflow:visible}
 body.dark .routine-item{background:#1a1a2e}
 body.dark .entry-card{background:#1a1a2e;border-color:rgba(212,169,106,.2)}
 body.dark .entry-field{color:#e8e4de}
@@ -347,6 +347,7 @@ textarea.form-input{resize:none}
 .diary-group-count{font-size:10px;font-weight:700;color:var(--gold);background:var(--goldlt);border-radius:10px;padding:2px 8px;flex-shrink:0}
 .diary-group-entries{border-top:1px solid var(--goldlt);padding:10px 13px;display:none}
 .diary-group-entries.open{display:block}
+.diary-group-entries.open{display:block}
 /* CLINICS & PRODUCTS */
 .clinics-list{padding:0 18px;display:flex;flex-direction:column;gap:10px}
 .clinic-card{background:var(--card);border-radius:var(--r);border:1px solid rgba(184,150,106,.15);padding:14px;box-shadow:var(--shadow)}
@@ -434,7 +435,7 @@ textarea.form-input{resize:none}
 .acc-arrow{font-size:14px;color:var(--gold);transition:transform .25s;display:inline-block}
 .acc-arrow.open{transform:rotate(180deg)}
 .acc-body{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1);padding:0 18px}
-.acc-body.open{max-height:1000px;padding:0 18px 14px}
+.acc-body.open{max-height:2000px;padding:0 18px 14px;overflow:visible}
 /* UTILS */
 .toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:20px;font-size:12.5px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
@@ -518,6 +519,8 @@ body.dark .sheet{background:#12122a!important}
 body.dark .sheet-hdr{background:#12122a!important}
 body.dark .coming-soon-overlay .sheet-inner{background:#1a1a2e!important}
 body.dark input[type="search"]{background:#12122a!important;color:#f0ede8!important}
+.profile-card-section:has(.acc-body.open){overflow:visible!important}
+#page-profile{overflow:visible}
 </style>
 <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#b8966a">
@@ -819,10 +822,10 @@ window.goPage=goPage;
         </div>
         <div class="acc-body">
         <div style="margin-top:8px;font-size:12px;color:var(--ink2)" data-t="notifHint">Задай процедура и дата за следващото си посещение.</div>
-        <div style="position:relative;margin-top:10px">
+        <div style="position:relative;margin-top:10px;overflow:visible">
           <input type="text" id="notif-proc-search" class="form-input" placeholder="🔍 Търси процедура..." style="font-size:16px" oninput="filterNotifProcs()" onfocus="showNotifProcs()">
           <input type="hidden" id="notif-proc">
-          <div id="notif-proc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid rgba(184,150,106,.3);border-radius:10px;max-height:180px;overflow-y:auto;z-index:50;box-shadow:0 4px 16px rgba(26,26,46,.12);margin-top:4px"></div>
+          <div id="notif-proc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid rgba(184,150,106,.3);border-radius:10px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(26,26,46,.25);margin-top:4px"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
           <input type="date" id="notif-date" class="form-input" style="flex:1;font-size:16px">
