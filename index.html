@@ -2108,7 +2108,7 @@ async function openSheet(id){
         window._cache.diaryTs=Date.now();
       }
       const entries=(window._cache.diary||[]).filter(d=>d.data().procId===id).sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
-      diaryEntriesHTML=entries.length?`<div class="diary-entries">${entries.map(d=>renderEntryCard(d)).join('')}</div>`:`<div style="text-align:center;padding:16px;color:var(--ink2);font-size:12px">${t('noEntries')}</div>`;
+      diaryEntriesHTML=entries.length?`<div class="diary-entries">${entries.map(d=>renderEntryCard(d)).join('')}</div>`:``;
     }catch(e){}
   }
   const mk=(arr,cls)=>(arr||[]).map(([em,txt])=>`<div class="care-item ${cls}"><span class="care-em">${em}</span><span class="care-txt">${txt}</span></div>`).join('');
@@ -2132,7 +2132,7 @@ async function openSheet(id){
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
     ${clinicAdsHTML}${productAdsHTML}
     ${window._user?`<div class="diary-section">
-      <div class="diary-section-title">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div>
+      <div class="diary-section-title" style="text-align:center">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div>
       <div id="de-entries-list">${diaryEntriesHTML}</div>
       <button onclick="toggleNewEntry()" id="new-entry-btn" style="width:100%;margin-top:10px;margin-bottom:0;padding:14px;background:linear-gradient(135deg,rgba(184,150,106,.1),rgba(212,169,106,.08));border:1.5px solid var(--gold);border-radius:14px;color:var(--gold);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;letter-spacing:.02em">
         ✦ ${t('newEntry')} ${fmtDate(new Date())}
@@ -2163,8 +2163,8 @@ async function openSheet(id){
       </div>
     </div>`:'<div style="text-align:center;padding:20px;color:var(--ink2);font-size:12.5px">'+t('loginToDiary')+'</div>'}
     <div style="margin:4px 0 0;padding:14px;background:linear-gradient(135deg,rgba(184,150,106,.08),rgba(212,169,106,.05));border:1.5px solid var(--gold);border-radius:14px;width:100%;box-sizing:border-box">
-      <div style="font-size:11px;color:var(--ink2);line-height:1.6;text-align:center">
-        ⭐ <strong style="color:var(--gold)">${t('disclaimerTitle')}</strong><br>${t('disclaimerBody')}
+      <div style="font-size:10px;color:var(--ink2);line-height:1.5;text-align:center;opacity:0.85">
+        ⭐ <strong style="color:var(--gold);font-size:10px">${t('disclaimerTitle')}</strong><br>${t('disclaimerBody')}
       </div>
     </div>
     `;
