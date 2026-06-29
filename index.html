@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="bg">
 <head>
 
@@ -861,7 +860,7 @@ window.goPage=goPage;
         <div class="acc-body">
         <div style="margin-top:8px;font-size:12px;color:var(--ink2)" data-t="notifHint">Задай процедура и дата за следващото си посещение.</div>
         <div style="position:relative;margin-top:10px;overflow:visible">
-          <input type="text" id="notif-proc-search" class="form-input" placeholder="🔍 Търси процедура..." style="font-size:16px" oninput="filterNotifProcs()" onfocus="showNotifProcs()">
+          <input type="text" id="notif-proc-search" class="form-input" placeholder="🔍 Търси процедура..." data-ph="searchProcs" style="font-size:16px" oninput="filterNotifProcs()" onfocus="showNotifProcs()">
           <input type="hidden" id="notif-proc">
           <div id="notif-proc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid rgba(184,150,106,.3);border-radius:10px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(26,26,46,.25);margin-top:4px"></div>
         </div>
@@ -2235,14 +2234,14 @@ function renderProcs(){
     const isFav=favIds.includes(p.id);
     return `<div class="proc-row" onclick="openSheet('${p.id}')">
       ${procCircleIcon(lp.name, '#b8966a', 42)}
-      <div class="proc-row-info">
-        <div class="proc-row-name">${lp.name}</div>
-        <div class="proc-row-sub">${lp.sub}</div>
+      <div class="proc-row-info" style="flex:1;min-width:0;overflow:hidden">
+        <div class="proc-row-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lp.name}</div>
+        <div class="proc-row-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lp.sub}</div>
         <div class="proc-row-subcat">${lp.subcat||p.subcat}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="proc-fav-btn" data-id="${p.id}" onclick="event.stopPropagation();toggleFavFromList('${p.id}',this)" style="font-size:16px;cursor:pointer;padding:4px">${isFav?'❤️':'🤍'}</span>
-        <div class="proc-row-arrow">›</div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;margin-left:4px">
+        <span class="proc-fav-btn" data-id="${p.id}" onclick="event.stopPropagation();toggleFavFromList('${p.id}',this)" style="font-size:20px;cursor:pointer;padding:4px;line-height:1">${isFav?'❤️':'🤍'}</span>
+        <div class="proc-row-arrow" style="flex-shrink:0">›</div>
       </div>
     </div>`;
   };
@@ -3860,14 +3859,25 @@ function filterNotifProcs(){
   const q = (document.getElementById('notif-proc-search').value||'').toLowerCase();
   const dd = document.getElementById('notif-proc-dropdown');
   if(!dd || !window.PROCS) return;
-  const filtered = window.PROCS.filter(p=>p.name.toLowerCase().includes(q)||p.subcat.toLowerCase().includes(q));
-  dd.innerHTML = filtered.slice(0,15).map(p=>`
-    <div onclick="selectNotifProc('${p.id}','${p.icon} ${p.name.replace(/'/g,"&#39;")}')" 
-         style="padding:9px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--goldlt);display:flex;align-items:center;gap:8px">
-      <span>${p.icon}</span><span>${p.name}</span>
-    </div>`).join('') || '<div style="padding:10px;font-size:12px;color:var(--ink2)">Няма намерени</div>';
-  dd.style.display = 'block';
+  const filtered = window.PROCS.filter(p=>{
+    const lp = procL(p);
+    return lp.name.toLowerCase().includes(q) ||
+           (lp.sub||'').toLowerCase().includes(q) ||
+           p.name.toLowerCase().includes(q) ||
+           (p.subcat||'').toLowerCase().includes(q);
+  });
+  const noResults = window._lang==='en'?'No results':'Няма намерени';
+  dd.innerHTML = filtered.slice(0,15).map(p=>{
+    const lp = procL(p);
+    const safeName = lp.name.replace(/'/g,"&#39;");
+    return '<div onclick="selectNotifProc(\''+p.id+'\',\''+safeName+'\')' +
+      '" style="padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--roselt);display:flex;align-items:center;gap:10px">' +
+      procCircleIcon(lp.name,'#b8966a',28) +
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lp.name+'</span></div>';
+  }).join('') || '<div style="padding:10px;font-size:12px;color:var(--ink2)">'+noResults+'</div>';
+  dd.style.display = (filtered.length || q) ? 'block' : 'none';
 }
+
 function selectNotifProc(id, name){
   const p = (window.PROCS||PROCS||[]).find(x=>x.id===id);
   const lp = p ? procL(p) : null;
