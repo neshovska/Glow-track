@@ -231,7 +231,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .page-hdr-title em{font-style:italic;color:var(--gold)}
 .page-hdr-sub{font-size:12px;color:var(--ink2);margin-top:3px}
 /* SEARCH + CATS */
-.search-wrap{padding:0 18px 10px}
+.search-wrap{padding:0 18px 10px;position:relative}
 .search-box{position:relative}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;color:var(--ink2)}
 .search-input{width:100%;padding:10px 12px 10px 34px;background:var(--card);border:1.5px solid var(--roselt);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:16px;color:var(--ink);outline:none;box-shadow:var(--shadow)}
@@ -629,15 +629,15 @@ window.goPage=goPage;
   <div class="page" id="page-diary">
     <div class="page-hdr"><div class="page-hdr-title" data-diary-hdr="1">Моят <em>дневник</em></div><div class="page-hdr-sub">Лична история на процедурите ти</div></div>
     <div style="padding:0 16px 10px;position:sticky;top:0;z-index:10;background:var(--mist)">
-      <div class="search-wrap" style="padding:0;margin-bottom:8px">
-        <span class="search-icon">🔍</span>
+      <div style="position:relative;margin-bottom:8px">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;color:var(--ink2);z-index:1">🔍</span>
         <input type="text" id="diary-search" class="search-input"
           placeholder="Намери извършена процедура..."
           data-ph="diarySearch"
           oninput="filterDiaryGroups(this.value)"
-          style="font-size:16px">
+          style="font-size:16px;padding-left:36px;padding-right:36px;width:100%;box-sizing:border-box">
         <button id="diary-search-clear" onclick="document.getElementById('diary-search').value='';filterDiaryGroups('')"
-          style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink2);font-size:16px">✕</button>
+          style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink2);font-size:16px;z-index:1;padding:4px">✕</button>
       </div>
       <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
         <button onclick="sortDiary('default')" id="dsort-default" class="dsort-btn dsort-active" data-t="sortDefault">📅 По дата</button>
