@@ -3926,79 +3926,98 @@ function selectEditNotifProc(id, name){
 function loadNotifsPage(){
   const content = document.getElementById('notifs-page-content');
   if(!content) return;
-
-  const notifs = _lsGet('gt_notifs')||[];
+  const notifs = (_lsGet('gt_notifs')||[]);
   const now = new Date();
+  const isBG = window._lang !== 'en';
 
-  // Sort by date
-  const sorted = [...notifs].sort((a,b)=>new Date(a.date)-new Date(b.date));
   const getNotifTime = n => {
-    let d = new Date(n.date);
-    if(n.time){ const [hh,mm]=(n.time.split(':')).map(Number); d.setHours(hh||0,mm||0,0,0); }
-    return d;
+    const dt = new Date(n.date);
+    if(n.time){const [hh,mm]=(n.time.split(':')).map(Number);dt.setHours(hh||0,mm||0,0,0);}
+    return dt;
   };
-  const upcoming = sorted.filter(n=>getNotifTime(n) >= now);
-  const past = sorted.filter(n=>getNotifTime(n) < now);
 
-  // Update badge
-  updateNotifBadge(upcoming.length);
+  const sorted = [...notifs].sort((a,b)=>getNotifTime(a)-getNotifTime(b));
+
+  // Split into 3 groups
+  const reminders = sorted.filter(n=>getNotifTime(n)>=now && n.type!=='booking');
+  const bookings  = sorted.filter(n=>getNotifTime(n)>=now && n.type==='booking');
+  const past      = sorted.filter(n=>getNotifTime(n)<now);
+
+  updateNotifBadge(reminders.length + bookings.length);
 
   if(!notifs.length){
-    content.innerHTML = `<div style="text-align:center;padding:40px 20px">
-      <div style="font-size:48px;margin-bottom:12px">🔔</div>
-      <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px">${t('noReminders')||'Все още няма напомняния'}</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:20px">${t('noRemindersSub')||'Отвори процедура и задай дата за следваща сесия'}</div>
-      <button onclick="goPage('procs',document.querySelector('.nb-btn'))" style="padding:11px 24px;background:linear-gradient(135deg,#b8966a,#d4a96a);color:#fff;border:none;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
-        ${t('browseProcs')||'Разгледай процедури →'}
-      </button>
+    content.innerHTML=`<div class="empty-state"><div class="empty-ic">🔔</div>
+      <div class="empty-title">${isBG?'Няма напомняния':'No reminders'}</div>
+      <div class="empty-sub">${isBG?'Добави напомняне от таба Профил':'Add reminders from the Profile tab'}</div>
     </div>`;
     return;
   }
 
   const renderCard = (n, isPast) => {
-    const dt = new Date(n.date);
-    // Use exact time if available
-    let dtExact = new Date(n.date);
-    if(n.time){
-      const [hh,mm]=(n.time.split(':')).map(Number);
-      dtExact.setHours(hh||0, mm||0, 0, 0);
-    }
+    const dtExact = getNotifTime(n);
     const diffMs = dtExact - now;
     const diff = Math.ceil(diffMs / 86400000);
-    const isPastExact = diffMs < 0;
-    const diffTxt = !isPastExact && diff === 0 ? (t('notifToday')||'Днес') :
-                    !isPastExact && diff === 1 ? (t('notifTomorrow')||'Утре') :
-                    !isPastExact && diff > 0 ? (window._lang==='en'?'In '+diff+' days':'След '+diff+' дни') :
-                    (t('notifPast')||'Минало');
-    const isPast2 = isPast || isPastExact;
-    const color = isPast2 ? '#c5bdb4' : diff===0 ? '#b8966a' : 'var(--ink1)';
-    const bg = isPast ? 'var(--goldlt)' : 'var(--card)';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:${bg};border-radius:14px;border:1px solid ${isPast?'rgba(184,150,106,.1)':'var(--goldlt)'};margin-bottom:8px;${isPast?'opacity:.6':''}">
-      <div style="width:38px;height:38px;border-radius:50%;background:${isPast?'#f0ede8':'linear-gradient(135deg,rgba(184,150,106,.15),rgba(212,169,106,.15))'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <span style="font-size:18px">${isPast?'✓':'🔔'}</span>
-      </div>
+    const isBooking = n.type === 'booking';
+
+    const diffTxt = isPast ? (isBG?'Минало':'Past') :
+      diff===0 ? (isBG?'Днес':'Today') :
+      diff===1 ? (isBG?'Утре':'Tomorrow') :
+      diff>0   ? (isBG?`След ${diff} дни`:`In ${diff} days`) :
+      (isBG?'Минало':'Past');
+
+    // Icon: ✅ for booking, 🔔 for reminder
+    const icon = isBooking ? '✅' : '🔔';
+
+    // Proc name translated
+    const procName = (()=>{
+      if(window.PROCS&&n.procId){
+        const _p=window.PROCS.find(x=>x.id===n.procId);
+        if(_p) return procL(_p).name;
+      }
+      return n.procName||'';
+    })();
+
+    const typeLabel = isBooking
+      ? (isBG?'Запазен час':'Booking')
+      : (isBG?'Напомняне':'Reminder');
+
+    return `<div class="notif-card" style="margin-bottom:8px;background:var(--card);border:1.5px solid ${isBooking?'rgba(184,150,106,.4)':'var(--roselt)'};border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;${isPast?'opacity:.6':''}">
+      <div style="font-size:24px;flex-shrink:0">${icon}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(window.PROCS&&n.procId?(()=>{const p=window.PROCS.find(x=>x.id===n.procId);return p?procL(p).name:n.procName;})():n.procName)}</div>
-        <div style="font-size:11px;color:var(--ink2)">${fmtDate(dt)} ${n.time?'· '+n.time:''} · ${diffTxt}</div>
+        <div style="font-size:13px;font-weight:700;color:${isBooking?'var(--gold)':'var(--ink)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${procName}</div>
+        <div style="font-size:11px;color:var(--ink2);margin-top:2px">${fmtDate(dtExact)}${n.time?' · '+n.time:''}</div>
+        <div style="font-size:10px;font-weight:600;color:${isPast?'#c5bdb4':isBooking?'var(--gold)':'var(--sage)'};margin-top:2px">${typeLabel} · ${diffTxt}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="editNotif('${n.id}')" style="background:none;border:1px solid var(--goldlt);border-radius:8px;color:var(--gold);cursor:pointer;font-size:14px;padding:4px 8px">✏️</button>
-        <button onclick="deleteNotifFromPage('${n.id}')" style="background:none;border:1px solid rgba(232,93,93,.2);border-radius:8px;color:#e85d5d;cursor:pointer;font-size:14px;padding:4px 8px">✕</button>
+        <button onclick="editNotif('${n.id}')" style="background:none;border:1.5px solid var(--gold);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--gold)">✏️</button>
+        <button onclick="deleteNotifFromPage('${n.id}')" style="background:none;border:1.5px solid #e85d5d;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:13px;color:#e85d5d;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
     </div>`;
   };
 
   let html = '';
-  if(upcoming.length){
-    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:16px 0 8px">${t('notifUpcoming')||'Предстоящи'}</div>`;
-    html += upcoming.map(n=>renderCard(n,false)).join('');
+
+  // Section 1: Reminders 🔔
+  if(reminders.length){
+    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:16px 0 8px;display:flex;align-items:center;gap:6px">🔔 ${isBG?'Напомняния':'Reminders'}</div>`;
+    html += reminders.map(n=>renderCard(n,false)).join('');
   }
+
+  // Section 2: Bookings ✅
+  if(bookings.length){
+    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:16px 0 8px;display:flex;align-items:center;gap:6px">✅ ${isBG?'Запазени часове':'Bookings'}</div>`;
+    html += bookings.map(n=>renderCard(n,false)).join('');
+  }
+
+  // Section 3: Past
   if(past.length){
-    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c5bdb4;margin:16px 0 8px">${t('notifPastSection')||'Минали'}</div>`;
+    html += `<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c5bdb4;margin:16px 0 8px">⏰ ${isBG?'Минали':'Past'}</div>`;
     html += past.map(n=>renderCard(n,true)).join('');
   }
-  content.innerHTML = html;
+
+  content.innerHTML = html || `<div class="empty-state"><div class="empty-ic">🔔</div><div class="empty-title">${isBG?'Няма напомняния':'No reminders'}</div></div>`;
 }
+
 function updateNotifBadge(count){
   const badge = document.getElementById('notif-badge');
   if(!badge) return;
