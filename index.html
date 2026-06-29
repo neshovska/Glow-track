@@ -1460,6 +1460,7 @@ const T = {
     contra: 'Противопоказания',
     before: 'Преди процедурата',
     after: 'След процедурата',
+    reactions: 'Възможни реакции',
     clinicAds: '🏥 Клиники предлагащи тази процедура',
     productAds: '🧴 Препоръчани продукти',
     partnerBadge: 'Партньор',
@@ -1686,6 +1687,7 @@ const T = {
     contra: 'Contraindications',
     before: 'Before the procedure',
     after: 'After the procedure',
+    reactions: 'Possible reactions',
     clinicAds: '🏥 Clinics offering this procedure',
     productAds: '🧴 Recommended products',
     partnerBadge: 'Partner',
@@ -2380,6 +2382,16 @@ async function openSheet(id){
     ${lp.contra?.length?acc(t('contra'), `<div class="info-card" style="margin-top:0;border-radius:12px">${lp.contra.map(c=>`<div class="contra-item"><div class="contra-dot"></div><div>${c}</div></div>`).join('')}</div>`):''}
     ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
+    ${lp.reactions?acc(t('reactions'), `<div class="info-card" style="margin-top:0">
+      ${lp.reactions.normal?.length?`<div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--sage);letter-spacing:.06em;margin-bottom:6px">✅ ${window._lang==='en'?'Normal reactions':'Нормални реакции'}</div>
+        ${lp.reactions.normal.map(r=>`<div class="result-row"><div class="result-dot" style="background:var(--sage)"></div><div class="result-txt">${r}</div></div>`).join('')}
+      </div>`:''}
+      ${lp.reactions.abnormal?.length?`<div>
+        <div style="font-size:11px;font-weight:700;color:#e85d5d;letter-spacing:.06em;margin-bottom:6px">⚠️ ${window._lang==='en'?'Consult a specialist':'Консултирайте специалист'}</div>
+        ${lp.reactions.abnormal.map(r=>`<div class="result-row"><div class="result-dot" style="background:#e85d5d"></div><div class="result-txt">${r}</div></div>`).join('')}
+      </div>`:''}
+    </div>`, false, true):''}
     ${clinicAdsHTML}${productAdsHTML}
     ${window._user?`<div class="diary-section">
       <div class="diary-section-title" style="text-align:center">${window._lang==='en'?'My <em>diary</em>':'Моят <em>дневник</em>'}</div>
