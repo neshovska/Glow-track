@@ -906,7 +906,67 @@ window.goPage=goPage;
       <button class="profile-btn danger" onclick="doLogout()" data-t="logoutBtn">Изход</button>
       <button class="profile-btn" onclick="confirmDeleteAccount()" style="color:#e85d5d;border-color:rgba(232,93,93,.2);font-size:12px;padding:9px" data-t="deleteProfileBtn">🗑️ Изтрий профила</button>
     </div>
-    <div style="text-align:center;padding:16px 18px 8px;font-size:10px;color:#cbbfae">GlowTrack · build v2026.06.27</div>
+    <div style="text-align:center;padding:8px 18px 0">
+      <button onclick="goPage('privacy',this)" style="background:none;border:none;font-size:11px;color:var(--ink2);cursor:pointer;text-decoration:underline;font-family:inherit">Privacy Policy</button>
+    </div>
+    <div style="text-align:center;padding:4px 18px 8px;font-size:10px;color:#cbbfae">GlowTrack · build v2026.06.27</div>
+  </div>
+  <div class="page" id="page-privacy">
+    <div class="page-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="history.back();goPage('profile')" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink2)">‹</button>
+        <div class="page-hdr-title" style="font-size:22px">Privacy Policy</div>
+      </div>
+      <div class="page-hdr-sub">GlowTrack · последно обновена юни 2026</div>
+    </div>
+    <div style="padding:0 18px 100px;color:var(--ink);font-size:13px;line-height:1.7">
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">КАКВИ ДАННИ СЪБИРАМЕ</div>
+        <p style="margin:0 0 8px"><strong>Акаунт:</strong> имейл адрес и парола (съхранявани сигурно чрез Google Firebase Authentication).</p>
+        <p style="margin:0 0 8px"><strong>Съдържание от теб:</strong> записи в дневника, напомняния, снимки, любими процедури и домашна рутина.</p>
+        <p style="margin:0"><strong>Не събираме:</strong> платежна информация, точна локация или здравни данни извън това, което ти въвеждаш доброволно.</p>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">КАК ИЗПОЛЗВАМЕ ДАННИТЕ</div>
+        <p style="margin:0 0 8px">✅ За да предоставим услугата GlowTrack</p>
+        <p style="margin:0 0 8px">✅ За синхронизация на дневника между устройства</p>
+        <p style="margin:0 0 8px">❌ Не продаваме данните ти на трети страни</p>
+        <p style="margin:0">❌ Не използваме данните за реклама</p>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">СЪХРАНЕНИЕ</div>
+        <p style="margin:0">Всички данни се съхраняват сигурно в <strong>Google Firebase</strong> (Firestore и Authentication), който е GDPR съвместим. Снимките се съхраняват криптирани.</p>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">ТВОИТЕ ПРАВА</div>
+        <p style="margin:0 0 8px">📝 Редактирай или изтрий всеки запис по всяко време</p>
+        <p style="margin:0 0 8px">🗑️ Изтрий целия акаунт: Профил → Изтрий профила</p>
+        <p style="margin:0">📧 Заявка за данни: gabriela.neshovska@gmail.com</p>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">ТРЕТИ СТРАНИ</div>
+        <p style="margin:0 0 6px">• <strong>Firebase (Google)</strong> — автентикация и съхранение</p>
+        <p style="margin:0">• <strong>GitHub Pages</strong> — хостинг на приложението</p>
+      </div>
+
+      <div style="background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--roselt)">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">ENGLISH VERSION</div>
+        <p style="margin:0 0 8px"><strong>Data collected:</strong> email, password, diary entries, reminders, photos. No payment or location data.</p>
+        <p style="margin:0 0 8px"><strong>Usage:</strong> to provide GlowTrack service only. Not sold or used for advertising.</p>
+        <p style="margin:0 0 8px"><strong>Storage:</strong> Google Firebase (GDPR compliant).</p>
+        <p style="margin:0"><strong>Your rights:</strong> edit/delete any entry, delete account anytime, request data export.</p>
+      </div>
+
+      <div style="text-align:center;padding:12px 0;font-size:11px;color:var(--ink2)">
+        GlowTrack · glowtrack.eu<br>
+        © 2026 Gabriela Neshovska · All rights reserved
+      </div>
+    </div>
   </div>
   <nav class="bnav" role="navigation" aria-label="Главна навигация">
     <button class="nb active" onclick="goPage('procs',this)"><span class="ni">🪷</span><span class="nl" id="nav-procs-lbl">Процедури</span></button>
