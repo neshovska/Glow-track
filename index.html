@@ -422,10 +422,10 @@ textarea.form-input{resize:none}
 @keyframes heartPop{0%{transform:scale(1)}30%{transform:scale(1.4)}60%{transform:scale(0.9)}100%{transform:scale(1)}}
 .heart-pop{animation:heartPop .4s ease}
 /* DRAG & DROP DIARY */
-.diary-group{touch-action:none}
+.diary-group{touch-action:pan-y}
 .diary-group.dragging{opacity:.5;background:#f5efe6;border-radius:14px}
 .diary-group.drag-over{border-top:2px solid var(--gold)}
-.drag-handle{cursor:grab;color:#c5bdb4;font-size:16px;padding:0 8px;user-select:none;display:flex;align-items:center}
+.drag-handle{cursor:grab;color:#c5bdb4;font-size:16px;padding:0 8px;user-select:none;display:flex;align-items:center;touch-action:none}
 .drag-handle:active{cursor:grabbing}
 /* ACCORDION */
 .acc-section{border-bottom:1px solid var(--goldlt);margin-bottom:0}
