@@ -4845,9 +4845,11 @@ if(!navigator.onLine) showToast(t('offline'), 4000);
 // ── SERVICE WORKER ──
 // Note: blob: URL registration not supported in Safari
 // SW must be registered from a dedicated sw.js file on same origin
+// Relative path — resolves correctly whether the app lives at domain root
+// or in a subdirectory (e.g. GitHub Pages project page /glowtrack/)
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   try{
-    navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js').catch((err)=>{console.error('SW register failed:',err);});
   }catch(e){}
 }
 
