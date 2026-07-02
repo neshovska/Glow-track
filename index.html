@@ -3825,6 +3825,15 @@ function openSkinQuiz(){
   renderSkinQuizQuestions();
   document.getElementById('skin-quiz-modal').scrollTop=0;
 }
+function viewSkinResult(){
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem(_lsKey('gt_skin_test'))||'null'); }catch(e){}
+  if(!saved || !saved.skinType){ openSkinQuiz(); return; }
+  document.getElementById('skin-quiz-modal').style.display='block';
+  document.body.style.overflow='hidden';
+  renderSkinResult(saved.skinType, saved.fototype);
+  document.getElementById('skin-quiz-modal').scrollTop=0;
+}
 function closeSkinQuiz(){
   document.getElementById('skin-quiz-modal').style.display='none';
   document.body.style.overflow='';
@@ -3927,7 +3936,8 @@ function renderSkinTestCard(){
           <div style="font-size:14px;font-weight:700;color:var(--ink)">${isBGq?ti.bg:ti.en} · ${['','I','II','III','IV','V','VI'][saved.fototype]}</div>
         </div>
       </div>
-      <button onclick="openSkinQuiz()" style="width:100%;margin-top:12px;padding:9px;background:none;border:1.5px solid rgba(184,150,106,.35);border-radius:10px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">↺ ${isBGq?'Направи теста отново':'Retake test'}</button>`;
+      <button onclick="viewSkinResult()" style="width:100%;margin-top:12px;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'✦ Виж резултата и препоръките':'✦ View result and recommendations'}</button>
+      <button onclick="openSkinQuiz()" style="width:100%;margin-top:8px;padding:8px;background:none;border:none;color:var(--ink2);font-size:11.5px;cursor:pointer;font-family:inherit;text-decoration:underline">↺ ${isBGq?'Направи теста отново':'Retake test'}</button>`;
   } else {
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
