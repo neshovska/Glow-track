@@ -1274,6 +1274,41 @@ function daysUntil(d){
   const b=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   return Math.round((b-a)/86400000);
 }
+// Smart default interval: reads the first 1-2 numbers out of a procedure's
+// interval text (e.g. "Face: 30–40 days · Torso: 45–60 days") and rounds to
+// the nearest step-of-5, clamped to [5,100]. Falls back to 30.
+function parseDefaultInterval(str){
+  if(!str) return 30;
+  const nums = (str.match(/\d+/g)||[]).map(Number).slice(0,2);
+  if(!nums.length) return 30;
+  const avg = nums.length>1 ? Math.round((nums[0]+nums[1])/2) : nums[0];
+  const stepped = Math.round(avg/5)*5;
+  return Math.min(100, Math.max(5, stepped||30));
+}
+function computeRemindDate(days){
+  const d=new Date(); d.setDate(d.getDate()+Number(days)); return d;
+}
+function updateProcRemindDate(){
+  const sel=document.getElementById('proc-remind-interval');
+  const prev=document.getElementById('proc-remind-date-preview');
+  if(!sel||!prev)return;
+  const d=computeRemindDate(sel.value);
+  prev.textContent=(window._lang==='en'?'Reminder on: ':'Напомняне на: ')+fmtDate(d);
+}
+async function saveProcRemind(procId,procName){
+  const sel=document.getElementById('proc-remind-interval');
+  if(!sel)return;
+  const days=Number(sel.value);
+  const d=computeRemindDate(days);
+  const yyyy=d.getFullYear(),mm=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
+  const dateStr=`${yyyy}-${mm}-${dd}`;
+  const saved=_lsGet('gt_notifs')||[];
+  saved.push({id:'n_'+Date.now(), procId, procName, date:dateStr, time:'10:00', type:'reminder'});
+  _lsSet('gt_notifs', saved);
+  if(window._user){ try{ await F().setDoc(F().doc(DB(),'users',window._user.uid),{notifs:_lsGet('gt_notifs')||[]},{merge:true}); }catch(e){} }
+  if(typeof updateNotifBadge==='function') updateNotifBadge(saved.filter(n=>new Date(n.date+'T'+(n.time||'10:00'))>=new Date()).length);
+  showToast(window._lang==='en'?'Reminder saved ✓':'Напомнянето е запазено ✓');
+}
 function _lsGet(base){ try{return JSON.parse(localStorage.getItem(_lsKey(base))||'null');}catch(e){return null;} }
 function _lsSet(base,val){ try{localStorage.setItem(_lsKey(base),JSON.stringify(val));}catch(e){} }
 function _lsRem(base){ try{localStorage.removeItem(_lsKey(base));}catch(e){} }
@@ -2429,6 +2464,21 @@ async function openSheet(id){
     ${lp.devices?.length?acc(t('devices'), `<div class="device-tags">${lp.devices.map(d=>`<span class="device-tag">${d}</span>`).join('')}</div>`, false, true):''}
     ${lp.zones?acc(t('zones'), `<div class="info-text">${lp.zones}</div>`, false, true):''}
     ${lp.results?.length?acc(t('results'), `${lp.results.map(r=>`<div class="result-row"><div class="result-dot"></div><div class="result-txt">${r}</div></div>`).join('')}<div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--goldlt);font-size:10.5px;color:var(--sage)">⏱️ ${lp.interval||''} · 💊 ${lp.sessions||''}</div>`, false, true):''}
+    ${(()=>{
+      const defInt = parseDefaultInterval(lp.interval);
+      const isBGr = window._lang!=='en';
+      const opts = [];
+      for(let n=5;n<=100;n+=5) opts.push(n);
+      const initDate = fmtDate(computeRemindDate(defInt));
+      return acc(isBGr?'⏰ Напомни ми за процедурата':'⏰ Remind me about the procedure', `
+        <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">${isBGr?'След колко дни да ти напомним? Заложен е подходящ интервал за тази процедура — можеш да го промениш.':'How many days until we remind you? A suitable default is pre-selected — feel free to change it.'}</div>
+        <select id="proc-remind-interval" onchange="updateProcRemindDate()" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--roselt);font-size:14px;font-family:inherit;background:var(--card);color:var(--ink1)">
+          ${opts.map(n=>`<option value="${n}" ${n===defInt?'selected':''}>${n} ${isBGr?'дни':'days'}${n===defInt?(isBGr?' (препоръчано)':' (recommended)'):''}</option>`).join('')}
+        </select>
+        <div id="proc-remind-date-preview" style="margin-top:8px;font-size:12.5px;color:var(--gold);font-weight:600">${(isBGr?'Напомняне на: ':'Reminder on: ')+initDate}</div>
+        <button onclick="saveProcRemind('${id}','${(lp.name||'').replace(/'/g,"&#39;")}')" style="margin-top:10px;width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${isBGr?'💾 Запази напомняне':'💾 Save reminder'}</button>
+      `, false, true);
+    })()}
     ${lp.contra?.length?acc(t('contra'), `<div class="info-card" style="margin-top:0;border-radius:12px">${lp.contra.map(c=>`<div class="contra-item"><div class="contra-dot"></div><div>${c}</div></div>`).join('')}</div>`):''}
     ${lp.before?.length?acc(t('before'), `<div class="care-list">${mk(lp.before,'warn')}</div>`):''}
     ${lp.after?.length?acc(t('after'), `<div class="care-list">${mk(lp.after.filter(a=>!a[1].startsWith(notPrefix)),'do')}${mk(lp.after.filter(a=>a[1].startsWith(notPrefix)),'dont')}</div>`):''}
