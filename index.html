@@ -897,7 +897,7 @@ window.goPage=goPage;
         <div style="margin-top:8px;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" data-t="notifHint">Задай дата за следващо посещение</div>
         <div id="push-notif-toggle-wrap" style="margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid rgba(184,150,106,.2);display:flex;align-items:flex-start;gap:12px">
           <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
-            <strong style="font-size:11px;color:var(--ink);white-space:nowrap">Push известия</strong>
+            <strong id="push-notif-title-label" style="font-size:11px;color:var(--ink);white-space:nowrap">Push известия</strong>
             <button id="push-notif-toggle-btn" onclick="initPushNotifications()" style="white-space:nowrap;padding:5px 11px;border-radius:50px;border:1.5px solid var(--gold);background:var(--gold);color:#fff;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">Включи</button>
           </div>
           <div id="push-notif-status-text" style="flex:1;min-width:0;color:var(--ink2);font-size:9.5px;line-height:1.5;padding-top:1px">Позволи на браузъра да изпраща известия, за да получаваш напомняния навреме. На iPhone добави приложението на началния екран, за да проработят.</div>
@@ -4996,21 +4996,31 @@ function loadNotifsPage(){
 function updatePushToggleUI(){
   const btn=document.getElementById('push-notif-toggle-btn');
   const txt=document.getElementById('push-notif-status-text');
+  const label=document.getElementById('push-notif-title-label');
+  const wrap=document.getElementById('push-notif-toggle-wrap');
   if(!btn||!txt)return;
   const status=typeof pushNotifStatus==='function'?pushNotifStatus():'default';
   btn.style.display='inline-block';
   if(status==='granted'){
     btn.textContent='✓ Включени';btn.style.background='var(--sage,#7a9b7e)';btn.style.borderColor='var(--sage,#7a9b7e)';btn.disabled=true;btn.style.opacity='0.85';btn.style.cursor='default';btn.style.color='#fff';
-    txt.textContent='Известията са активни на това устройство. Ще получаваш напомняния дори когато приложението е затворено.';
+    txt.textContent='';txt.style.display='none';
+    if(label)label.style.display='none';
+    if(wrap){wrap.style.padding='8px 12px';wrap.style.justifyContent='center';wrap.style.alignItems='center';}
   }else if(status==='denied'){
     btn.textContent='Блокирани';btn.style.background='var(--card)';btn.style.color='var(--ink2)';btn.disabled=true;btn.style.cursor='default';btn.style.borderColor='var(--roselt)';
-    txt.textContent='Известията са блокирани от браузъра. Разреши ги от настройките на телефона, за да продължиш.';
+    txt.textContent='Известията са блокирани от браузъра. Разреши ги от настройките на телефона, за да продължиш.';txt.style.display='block';
+    if(label)label.style.display='block';
+    if(wrap){wrap.style.padding='10px 12px';wrap.style.justifyContent='flex-start';}
   }else if(status==='unsupported'){
     btn.textContent='Недостъпно';btn.style.background='var(--card)';btn.style.color='var(--ink2)';btn.disabled=true;btn.style.cursor='default';btn.style.borderColor='var(--roselt)';
-    txt.innerHTML='Push известията не работят в браузър таб. Добави приложението на десктоп (Share → Add to Home Screen).';
+    txt.innerHTML='Push известията не работят в браузър таб. Добави приложението на десктоп (Share → Add to Home Screen).';txt.style.display='block';
+    if(label)label.style.display='block';
+    if(wrap){wrap.style.padding='10px 12px';wrap.style.justifyContent='flex-start';}
   }else{
     btn.textContent='Включи';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';btn.style.background='var(--gold)';btn.style.borderColor='var(--gold)';btn.style.color='#fff';
-    txt.textContent='Позволи на браузъра да изпраща известия, за да получаваш напомняния навреме. На iPhone добави приложението на началния екран, за да проработят.';
+    txt.textContent='Позволи на браузъра да изпраща известия, за да получаваш напомняния навреме. На iPhone добави приложението на началния екран, за да проработят.';txt.style.display='block';
+    if(label)label.style.display='block';
+    if(wrap){wrap.style.padding='10px 12px';wrap.style.justifyContent='flex-start';}
   }
 }
 function updateNotifBadge(count){
