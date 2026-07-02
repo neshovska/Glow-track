@@ -570,7 +570,7 @@ window.goPage=goPage;
 </head>
 <body>
 <div class="bg"></div>
-<div class="auth-screen" id="auth-screen">
+<div class="auth-screen hidden" id="auth-screen">
   
   <div class="auth-logo">Glow<span>Track</span></div>
   <div class="auth-tagline">Know your glow.</div>
@@ -1228,6 +1228,7 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('prof-name').textContent=user.displayName||user.email.split('@')[0];
     document.getElementById('prof-email').textContent=user.email;
     document.getElementById('topbar-right').textContent='';
+    document.getElementById('topbar-right').style.display='none';
     const _name=user.displayName||user.email.split('@')[0]||'';
     const _parts=_name.trim().split(/\s+/);
     const _ini=(_parts[0]?_parts[0][0]:'')+((_parts.length>1&&_parts[_parts.length-1])?_parts[_parts.length-1][0]:'');
@@ -1256,10 +1257,18 @@ onAuthStateChanged(auth,async user=>{
     window._user=null;
     window._lastUserId=null;
     if(typeof invalidateCache==='function')invalidateCache();window._isAdmin=false;
-    document.getElementById('auth-screen').classList.remove('hidden');
-    document.getElementById('app').classList.remove('show');
+    // Guests browse freely — auth-screen only opens when they tap "Влез" or
+    // try a personal action (diary, reminders, profile). Keep it closed here.
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('show');
+    document.getElementById('topbar-right').innerHTML =
+      `<button onclick="openAuthScreen()" style="background:var(--gold);color:#fff;border:none;border-radius:50px;padding:6px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">${window._lang==='en'?'Sign in':'Влез'}</button>`;
+    document.getElementById('topbar-right').style.display='block';
   }
 });
+window.openAuthScreen=function(){
+  document.getElementById('auth-screen').classList.remove('hidden');
+};
 </script>
 
 
@@ -2081,7 +2090,16 @@ function goPage(name,btn){
   try{
     if(name==='diary')loadDiaryTab();
     if(name==='notifs')loadNotifsPage();
-    if(name==='profile')loadProfileStats();
+    if(name==='profile'){
+      if(!window._user){
+        const pc=document.querySelector('#page-profile .profile-card');
+        if(pc)pc.innerHTML=`<div style="text-align:center;padding:24px 8px">
+          <div style="font-size:36px;margin-bottom:10px">🔐</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">${window._lang==='en'?'Sign in to see your profile':'Влез, за да видиш профила си'}</div>
+          <button onclick="openAuthScreen()" style="margin-top:8px;padding:10px 24px;background:var(--gold);color:#fff;border:none;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${window._lang==='en'?'Sign in / Sign up':'Влез / Регистрирай се'}</button>
+        </div>`;
+      } else loadProfileStats();
+    }
   }catch(e){}
 }
 window.goPage=goPage;
@@ -2487,16 +2505,15 @@ async function openSheet(id){
         const opts = [];
         for(let n=5;n<=100;n+=5) opts.push(n);
         const initDate = fmtDate(computeRemindDate(defInt));
-        const clockSvg = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><circle cx="12" cy="12" r="9" stroke="#b8966a" stroke-width="1.6"/><path d="M12 7V12L15.5 14.5" stroke="#b8966a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        return `<div style="margin-bottom:10px;border:1.5px solid #b8966a33;border-radius:14px;background:var(--card);padding:14px 14px 12px">
-          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center">${clockSvg}${isBGr?'Напомни ми за процедурата':'Remind me about the procedure'}</div>
+        const clockSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px"><circle cx="12" cy="12" r="9" stroke="#b8966a" stroke-width="1.6"/><path d="M12 7V12L15.5 14.5" stroke="#b8966a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        const body = `
           <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">${isBGr?'След колко дни да ти напомним? Заложен е подходящ интервал за тази процедура — можеш да го промениш.':'How many days until we remind you? A suitable default is pre-selected — feel free to change it.'}</div>
           <select id="proc-remind-interval" onchange="updateProcRemindDate()" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--roselt);font-size:14px;font-family:inherit;background:var(--card);color:var(--ink1)">
             ${opts.map(n=>`<option value="${n}" ${n===defInt?'selected':''}>${n} ${isBGr?'дни':'days'}${n===defInt?(isBGr?' (препоръчано)':' (recommended)'):''}</option>`).join('')}
           </select>
           <div id="proc-remind-date-preview" style="margin-top:8px;font-size:12.5px;color:var(--gold);font-weight:600">${(isBGr?'Напомняне на: ':'Reminder on: ')+initDate}</div>
-          <button onclick="saveProcRemind('${id}','${(lp.name||'').replace(/'/g,"&#39;")}')" style="margin-top:10px;width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${isBGr?'💾 Запази напомняне':'💾 Save reminder'}</button>
-        </div>`;
+          <button onclick="saveProcRemind('${id}','${(lp.name||'').replace(/'/g,"&#39;")}')" style="margin-top:10px;width:100%;padding:11px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${isBGr?'💾 Запази напомняне':'💾 Save reminder'}</button>`;
+        return acc(`${clockSvg}${isBGr?'Напомни ми за процедурата':'Remind me about the procedure'}`, body, false, true);
       })()}
 
       <!-- BUTTON 1: New entry -->
@@ -2572,7 +2589,10 @@ async function openSheet(id){
       </button>
       <div id="proc-history-list" style="display:none;margin-top:8px">${diaryEntriesHTML}</div>`:''}
 
-    </div>`:'<div style="text-align:center;padding:20px;color:var(--ink2);font-size:12.5px">'+t('loginToDiary')+'</div>'}
+    </div>`:`<div style="text-align:center;padding:24px 16px;border:1.5px solid #b8966a33;border-radius:14px;background:var(--card)">
+      <div style="font-size:13px;color:var(--ink2);margin-bottom:12px">${t('loginToDiary')}</div>
+      <button onclick="openAuthScreen()" style="padding:10px 24px;background:var(--gold);color:#fff;border:none;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${window._lang==='en'?'Sign in / Sign up':'Влез / Регистрирай се'}</button>
+    </div>`}
     `;
   }catch(err){console.error('Sheet render error:',err);document.getElementById('sh-body').innerHTML='<div style="padding:20px;color:red">Error: '+err.message+'</div>';}
   document.getElementById('overlay').classList.add('open');
@@ -3051,7 +3071,7 @@ async function deleteEntry(eid,procId){
 async function loadDiaryTab(){
   const el=document.getElementById('diary-tab-content');
   if(!window._user){
-    el.innerHTML=`<div class="empty-state"><div class="empty-ic">🔐</div><div class="empty-title">${window._lang==='en'?'Sign in':'Влез в акаунта си'}</div><div class="empty-sub">${window._lang==='en'?'To see your personal diary':'За да виждаш личния си дневник'}</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-ic">🔐</div><div class="empty-title">${window._lang==='en'?'Sign in':'Влез в акаунта си'}</div><div class="empty-sub">${window._lang==='en'?'To see your personal diary':'За да виждаш личния си дневник'}</div><button onclick="openAuthScreen()" style="margin-top:14px;padding:10px 24px;background:var(--gold);color:#fff;border:none;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${window._lang==='en'?'Sign in / Sign up':'Влез / Регистрирай се'}</button></div>`;
     return;
   }
   // Show skeleton while loading
