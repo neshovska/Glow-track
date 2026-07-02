@@ -223,6 +223,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--mist);min-heigh
 .logo{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;letter-spacing:.06em;color:var(--ink)}
 .logo span{color:var(--gold)}
 .page{display:none;animation:fadeIn .18s ease}
+#page-profile{background-image:url('./profile-shadow-leaves.jpg');background-size:cover;background-position:center top;background-repeat:no-repeat;background-attachment:local}
 .page.active{display:block;min-height:100%;overflow-y:visible}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .page-hdr{padding:20px 18px 14px}
@@ -685,12 +686,14 @@ window.goPage=goPage;
   <div class="page" id="page-profile">
     <div class="page-hdr" style="display:none"><div class="page-hdr-title"></div></div>
     <div class="profile-card">
-  <div class="glow-lockup" style="display:flex;align-items:center;justify-content:center;height:80px;gap:10px;margin:0 auto 12px">
+  <div class="glow-lockup" style="display:flex;align-items:center;justify-content:center;height:80px;gap:8px;margin:0 auto 12px">
     <span class="glow-letter" style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:52px;line-height:1;color:rgba(184,150,106,.38);flex-shrink:0">G</span><span class="glow-letter" style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:52px;line-height:1;color:rgba(184,150,106,.38);flex-shrink:0">L</span>
+    <span style="width:18px;height:1.5px;background:rgba(184,150,106,.4);flex-shrink:0"></span>
     <div class="profile-av" id="profile-av-wrap" style="width:80px;height:80px;border-radius:50%;border:2px solid #b8966a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#b8966a;font-family:'DM Sans',sans-serif;letter-spacing:.05em;background:rgba(184,150,106,.08);flex-shrink:0">?</div>
+    <span style="width:18px;height:1.5px;background:rgba(184,150,106,.4);flex-shrink:0"></span>
     <span class="glow-letter" style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:52px;line-height:1;color:rgba(184,150,106,.38);flex-shrink:0">W</span>
   </div>
-  <div class="profile-name" id="prof-name">—</div>
+  <div class="profile-name" id="prof-name" style="color:#1a1a2e">—</div>
   <div class="profile-email" id="prof-email">—</div>
   <button onclick="showEditProfile()" style="margin-top:10px;padding:6px 16px;background:none;border:1.5px solid rgba(184,150,106,.35);border-radius:20px;font-size:11px;font-weight:600;color:var(--gold);cursor:pointer;font-family:inherit" id="edit-profile-btn">✏️ <span data-t="editProfileBtn">Редактирай профила</span></button>
 </div>
@@ -1547,7 +1550,7 @@ const T = {
     productsSearch: 'Търси продукт или процедура...',
     profileTitle: 'Моят профил',
     logoutBtn: 'Изход',
-    editProfileBtn: 'Редактирай профила',
+    editProfileBtn: 'Редактирайте профила',
     editProfileTitle: '✏️ Редактирай профила',
     editNotifTitle: '✏️ Редактирай напомняне',
     notifProc: 'Процедура',
