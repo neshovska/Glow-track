@@ -3997,10 +3997,20 @@ const SYMPTOM_TAGS = [
   {v:'oily', bg:'Мазност', en:'Oiliness', icon:'💧'},
   {v:'glow', bg:'Сияние', en:'Glow', icon:'✨'},
 ];
+const CYCLE_WEEKDAYS_BG = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+const CYCLE_WEEKDAYS_EN = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+const CYCLE_MONTHS_BG = ['Януари','Февруари','Март','Април','Май','Юни','Юли','Август','Септември','Октомври','Ноември','Декември'];
+const CYCLE_MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function _loadCycleData(){
-  try{ return JSON.parse(localStorage.getItem(_lsKey('gt_cycle'))||'null') || {periods:[], symptoms:{}, cycleLength:28}; }
-  catch(e){ return {periods:[], symptoms:{}, cycleLength:28}; }
+  try{
+    const d = JSON.parse(localStorage.getItem(_lsKey('gt_cycle'))||'null') || {periods:[], symptoms:{}, cycleLength:28};
+    // Migrate legacy format (array of plain date strings) to {start,end} objects
+    if(d.periods.length && typeof d.periods[0]==='string'){
+      d.periods = d.periods.map(s=>({start:s, end:s}));
+    }
+    return d;
+  }catch(e){ return {periods:[], symptoms:{}, cycleLength:28}; }
 }
 async function _saveCycleData(data){
   try{
@@ -4010,7 +4020,7 @@ async function _saveCycleData(data){
 }
 function _computeCycleLength(periods){
   if(periods.length < 2) return 28;
-  const sorted = [...periods].sort();
+  const sorted = [...periods].map(p=>p.start).sort();
   const diffs = [];
   for(let i=1;i<sorted.length;i++){
     const d = Math.round((new Date(sorted[i]) - new Date(sorted[i-1])) / 86400000);
@@ -4019,16 +4029,20 @@ function _computeCycleLength(periods){
   if(!diffs.length) return 28;
   return Math.round(diffs.reduce((a,b)=>a+b,0)/diffs.length);
 }
+function _computePeriodLength(periods){
+  const lens = periods.filter(p=>p.start&&p.end).map(p=>Math.round((new Date(p.end)-new Date(p.start))/86400000)+1).filter(n=>n>0&&n<15);
+  if(!lens.length) return 5;
+  return Math.round(lens.reduce((a,b)=>a+b,0)/lens.length);
+}
 function _phaseForDate(dateStr, cycleData){
   if(!cycleData.periods.length) return null;
-  const sorted = [...cycleData.periods].sort();
+  const sorted = [...cycleData.periods].map(p=>p.start).sort();
   const cycleLen = cycleData.cycleLength || 28;
+  const periodLen = _computePeriodLength(cycleData.periods);
   const d = new Date(dateStr);
-  // Find the most recent period start on/before this date; if none, use the earliest and extrapolate backward
   let lastStart = null;
   for(const p of sorted){ if(new Date(p) <= d) lastStart = p; }
   if(!lastStart){
-    // date is before any logged period — extrapolate backwards from earliest
     lastStart = sorted[0];
     let ls = new Date(lastStart);
     while(ls > d){ ls.setDate(ls.getDate() - cycleLen); }
@@ -4036,12 +4050,32 @@ function _phaseForDate(dateStr, cycleData){
   }
   const dayOfCycle = Math.floor((d - new Date(lastStart)) / 86400000) % cycleLen + 1;
   const ovulationDay = Math.max(10, cycleLen - 14);
-  if(dayOfCycle <= 5) return 'menstrual';
+  if(dayOfCycle <= periodLen) return 'menstrual';
   if(dayOfCycle < ovulationDay - 1) return 'follicular';
   if(dayOfCycle <= ovulationDay + 1) return 'ovulation';
   return 'luteal';
 }
+function _getPredictedPeriods(data, count){
+  if(!data.periods.length) return [];
+  const sorted = [...data.periods].sort((a,b)=>a.start<b.start?1:-1);
+  const lastStart = new Date(sorted[0].start);
+  const cycleLen = data.cycleLength || 28;
+  const periodLen = _computePeriodLength(data.periods);
+  const out = [];
+  for(let k=1;k<=count;k++){
+    const s = new Date(lastStart); s.setDate(s.getDate() + cycleLen*k);
+    const e = new Date(s); e.setDate(e.getDate() + periodLen - 1);
+    out.push({start:s.toISOString().slice(0,10), end:e.toISOString().slice(0,10)});
+  }
+  return out;
+}
+function _dateInRange(dateStr, start, end){
+  return dateStr >= start && dateStr <= (end||start);
+}
+window._cycleCalDate = null; // Date object, day=1, representing displayed month
 function openCycleTracker(){
+  window._cycleCalDate = new Date(); window._cycleCalDate.setDate(1);
+  window._cyclePendingStart = null;
   document.getElementById('cycle-tracker-modal').style.display='block';
   document.body.style.overflow='hidden';
   renderCycleTracker();
@@ -4051,19 +4085,35 @@ function closeCycleTracker(){
   document.getElementById('cycle-tracker-modal').style.display='none';
   document.body.style.overflow='';
 }
-async function logPeriodStart(){
-  const input = document.getElementById('cycle-period-date');
-  if(!input || !input.value) return;
+function changeCycleMonth(delta){
+  window._cycleCalDate.setMonth(window._cycleCalDate.getMonth()+delta);
+  renderCycleTracker();
+}
+window._cyclePendingStart = null;
+async function onCycleDayTap(dateStr){
+  if(!window._cyclePendingStart){
+    window._cyclePendingStart = dateStr;
+    showToast(window._lang==='en'?'Now tap the last day of your period':'Сега избери последния ден на цикъла');
+    renderCycleTracker();
+    return;
+  }
+  let start = window._cyclePendingStart, end = dateStr;
+  if(end < start){ const t=start; start=end; end=t; }
   const data = _loadCycleData();
-  if(!data.periods.includes(input.value)) data.periods.push(input.value);
+  data.periods.push({start, end});
   data.cycleLength = _computeCycleLength(data.periods);
+  window._cyclePendingStart = null;
   await _saveCycleData(data);
   showToast(window._lang==='en'?'Period logged ✓':'Записано ✓');
   renderCycleTracker();
 }
-async function removePeriodDate(dateStr){
+function cancelCyclePending(){
+  window._cyclePendingStart = null;
+  renderCycleTracker();
+}
+async function removePeriod(idx){
   const data = _loadCycleData();
-  data.periods = data.periods.filter(p=>p!==dateStr);
+  data.periods.splice(idx,1);
   data.cycleLength = _computeCycleLength(data.periods);
   await _saveCycleData(data);
   renderCycleTracker();
@@ -4078,19 +4128,71 @@ async function toggleSymptom(dateStr, tag){
   await _saveCycleData(data);
   renderCycleTracker();
 }
+function renderCycleCalendarGrid(data){
+  const isBGq = window._lang!=='en';
+  const calDate = window._cycleCalDate;
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  const first = new Date(year, month, 1);
+  const startOffset = (first.getDay()+6)%7; // Monday=0
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const predicted = _getPredictedPeriods(data, 3);
+  const weekdays = isBGq?CYCLE_WEEKDAYS_BG:CYCLE_WEEKDAYS_EN;
+  const monthName = (isBGq?CYCLE_MONTHS_BG:CYCLE_MONTHS_EN)[month];
+
+  let cells = '';
+  for(let i=0;i<startOffset;i++) cells += `<div></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isLogged = data.periods.some(p=>_dateInRange(dateStr, p.start, p.end));
+    const isPredicted = !isLogged && predicted.some(p=>_dateInRange(dateStr, p.start, p.end));
+    const isToday = dateStr === todayStr;
+    const isPending = window._cyclePendingStart === dateStr;
+    let style = 'width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11.5px;cursor:pointer;font-family:inherit;border:none;';
+    if(isPending){ style += 'background:var(--gold);color:#fff;font-weight:700;box-shadow:0 0 0 2px var(--gold)'; }
+    else if(isLogged){ style += 'background:#c06858;color:#fff;font-weight:700;'; }
+    else if(isPredicted){ style += 'background:rgba(192,104,88,.22);color:#c06858;font-weight:600;border:1.5px dashed rgba(192,104,88,.5);'; }
+    else if(isToday){ style += 'background:var(--card);color:var(--ink1);font-weight:700;box-shadow:0 0 0 1.5px var(--gold) inset;'; }
+    else{ style += 'background:transparent;color:var(--ink1);'; }
+    cells += `<button onclick="onCycleDayTap('${dateStr}')" style="${style}">${day}</button>`;
+  }
+
+  return `
+    <div style="border:1.5px solid #b8966a33;border-radius:14px;background:var(--card);padding:14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button onclick="changeCycleMonth(-1)" style="background:none;border:none;font-size:16px;color:var(--gold);cursor:pointer;padding:4px 8px">‹</button>
+        <div style="font-size:13.5px;font-weight:700;color:var(--ink)">${monthName} ${year}</div>
+        <button onclick="changeCycleMonth(1)" style="background:none;border:none;font-size:16px;color:var(--gold);cursor:pointer;padding:4px 8px">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
+        ${weekdays.map(w=>`<div style="text-align:center;font-size:10px;color:var(--ink2);font-weight:600">${w}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${cells}</div>
+      <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:50%;background:#c06858;display:inline-block"></span>${isBGq?'Записан цикъл':'Logged period'}</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink2)"><span style="width:10px;height:10px;border-radius:50%;background:rgba(192,104,88,.22);border:1.5px dashed rgba(192,104,88,.5);display:inline-block"></span>${isBGq?'Очакван цикъл':'Predicted period'}</div>
+      </div>
+      ${window._cyclePendingStart?`<div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(184,150,106,.1);border-radius:10px">
+        <span style="font-size:11px;color:var(--gold)">${isBGq?'Избери последен ден на цикъла...':'Tap the last day of your period...'}</span>
+        <button onclick="cancelCyclePending()" style="background:none;border:none;color:var(--ink2);font-size:11px;cursor:pointer;text-decoration:underline">${isBGq?'Отказ':'Cancel'}</button>
+      </div>`:`<div style="margin-top:10px;font-size:10.5px;color:var(--ink2)">${isBGq?'Докосни първия ден на цикъла, после последния.':'Tap the first day of your period, then the last.'}</div>`}
+    </div>`;
+}
 function renderCycleTracker(){
   const isBGq = window._lang!=='en';
   const data = _loadCycleData();
   const body = document.getElementById('cycle-tracker-body');
   const todayStr = new Date().toISOString().slice(0,10);
-  const sortedPeriods = [...data.periods].sort().reverse();
+  const sortedPeriods = [...data.periods].sort((a,b)=>a.start<b.start?1:-1);
   const lastPeriod = sortedPeriods[0];
   const currentPhase = lastPeriod ? _phaseForDate(todayStr, data) : null;
+
+  const calendarHTML = renderCycleCalendarGrid(data);
 
   let phaseHTML = '';
   if(currentPhase){
     const pi = CYCLE_PHASE_INFO[currentPhase];
-    const nextPeriod = new Date(lastPeriod);
+    const nextPeriod = new Date(lastPeriod.start);
     nextPeriod.setDate(nextPeriod.getDate() + (data.cycleLength||28));
     const daysUntilNext = daysUntil(nextPeriod);
     const recProcs = (pi.recIds||[]).map(id=>PROCS.find(p=>p.id===id)).filter(Boolean);
@@ -4113,22 +4215,24 @@ function renderCycleTracker(){
       </div>`:''}
     `;
   } else {
-    phaseHTML = `<div style="text-align:center;padding:20px 12px;color:var(--ink2);font-size:12.5px;margin-bottom:14px">${isBGq?'Добави дата на последния цикъл, за да видиш фазата и препоръките.':'Add your last period date to see your phase and recommendations.'}</div>`;
+    phaseHTML = `<div style="text-align:center;padding:14px 12px;color:var(--ink2);font-size:12.5px;margin-bottom:14px">${isBGq?'Отбележи цикъл в календара, за да видиш фазата и препоръките.':'Log a period in the calendar to see your phase and recommendations.'}</div>`;
   }
 
-  // Log period date
-  const logHTML = `
+  // History list
+  const historyHTML = sortedPeriods.length?`
     <div style="border:1.5px solid #b8966a33;border-radius:14px;background:var(--card);padding:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">${isBGq?'Отбележи начало на цикъл':'Log period start'}</div>
-      <div style="display:flex;gap:8px">
-        <input type="date" id="cycle-period-date" max="${todayStr}" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--roselt);font-size:13px;font-family:inherit;background:var(--card);color:var(--ink1)">
-        <button onclick="logPeriodStart()" style="padding:9px 16px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'Запази':'Save'}</button>
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">${isBGq?'История':'History'} · ${isBGq?'среден цикъл':'avg cycle'} ${data.cycleLength} ${isBGq?'дни':'days'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${sortedPeriods.slice(0,8).map(p=>{
+          const idx = data.periods.indexOf(p);
+          const label = p.start===p.end ? fmtDate(new Date(p.start)) : `${fmtDate(new Date(p.start))} – ${fmtDate(new Date(p.end))}`;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--roselt);border-radius:10px">
+            <span style="font-size:11.5px;color:var(--ink1)">🩸 ${label}</span>
+            <span onclick="removePeriod(${idx})" style="cursor:pointer;color:var(--gold);font-weight:700;font-size:13px;padding:0 4px">×</span>
+          </div>`;
+        }).join('')}
       </div>
-      ${sortedPeriods.length?`<div style="margin-top:10px;font-size:11px;color:var(--ink2)">${isBGq?'Среден цикъл':'Average cycle'}: ${data.cycleLength} ${isBGq?'дни':'days'}</div>
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
-        ${sortedPeriods.slice(0,6).map(p=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:20px;background:var(--roselt);font-size:10.5px;color:var(--ink2)">${fmtDate(new Date(p))} <span onclick="removePeriodDate('${p}')" style="cursor:pointer;color:var(--gold);font-weight:700">×</span></span>`).join('')}
-      </div>`:''}
-    </div>`;
+    </div>`:'';
 
   // Symptom logging for today
   const todaySymptoms = data.symptoms[todayStr] || [];
@@ -4178,8 +4282,9 @@ function renderCycleTracker(){
 
   body.innerHTML = `
     <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${isBGq?'Общ ориентир, не медицински съвет — при въпроси се консултирай с лекар.':'General guidance, not medical advice — consult a doctor with questions.'}</div>
-    ${logHTML}
+    ${calendarHTML}
     ${phaseHTML}
+    ${historyHTML}
     ${symptomHTML}
     ${patternsHTML}
   `;
@@ -4190,7 +4295,7 @@ function renderCycleTrackerCard(){
   if(!el) return;
   const isBGq = window._lang!=='en';
   const data = _loadCycleData();
-  const sortedPeriods = [...data.periods].sort().reverse();
+  const sortedPeriods = [...data.periods].sort((a,b)=>a.start<b.start?1:-1);
   if(sortedPeriods.length){
     const todayStr = new Date().toISOString().slice(0,10);
     const phase = _phaseForDate(todayStr, data);
@@ -4216,6 +4321,7 @@ function renderCycleTrackerCard(){
       <button onclick="openCycleTracker()" style="width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'🌙 Настрой календара':'🌙 Set up calendar'}</button>`;
   }
 }
+
 
 function loadProfileStats(){
   if(!window._user) return;
