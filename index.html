@@ -1267,6 +1267,13 @@ onAuthStateChanged(auth,async user=>{
 
 // ── PER-USER localStorage helpers ──
 function _lsKey(base){ return window._user ? base+'_'+window._user.uid : base+'_guest'; }
+// Calendar-day difference (ignores time-of-day) — fixes "today shows as tomorrow" bug
+function daysUntil(d){
+  const now=new Date();
+  const a=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const b=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  return Math.round((b-a)/86400000);
+}
 function _lsGet(base){ try{return JSON.parse(localStorage.getItem(_lsKey(base))||'null');}catch(e){return null;} }
 function _lsSet(base,val){ try{localStorage.setItem(_lsKey(base),JSON.stringify(val));}catch(e){} }
 function _lsRem(base){ try{localStorage.removeItem(_lsKey(base));}catch(e){} }
@@ -3901,7 +3908,7 @@ function loadNotifProcSelector(){
     <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
       ${saved.map(n=>{
         const dt = new Date(n.date);
-        const diff = Math.ceil((dt - new Date()) / 86400000);
+        const diff = daysUntil(dt);
         const diffTxt = diff > 0 ? 'След '+diff+' дни' : diff === 0 ? '🔔 Днес' : '⚠️ Минало';
         const color = diff < 0 ? '#e85d5d' : diff === 0 ? '#b8966a' : 'var(--ink2)';
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#faf8f5;border-radius:10px;border:1px solid var(--goldlt)">
@@ -4027,7 +4034,7 @@ function checkReminders(){
         <div style="display:flex;flex-direction:column;gap:8px">
           ${upcoming.map(n=>{
             const nd = new Date(n.date);
-            const diff = Math.ceil((nd - now) / 86400000);
+            const diff = daysUntil(nd);
             const diffTxt = diff === 0 ? 'Днес' : diff === 1 ? 'Утре' : 'След '+diff+' дни';
             const color = diff === 0 ? '#b8966a' : 'var(--ink2)';
             return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#faf8f5;border-radius:12px;border:1px solid rgba(184,150,106,.2)">
@@ -4231,8 +4238,7 @@ function loadNotifsPage(){
 
   const renderCard = (n, isPast) => {
     const dtExact = getNotifTime(n);
-    const diffMs = dtExact - now;
-    const diff = Math.ceil(diffMs / 86400000);
+    const diff = daysUntil(dtExact);
     const isBooking = n.type === 'booking';
 
     const diffTxt = isPast ? (isBG?'Минало':'Past') :
