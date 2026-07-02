@@ -689,6 +689,8 @@ window.goPage=goPage;
 </div>
 <!-- Skin test summary / launcher -->
 <div id="skin-test-card" style="margin-top:14px;border:1.5px solid #b8966a33;border-radius:16px;background:var(--card);padding:16px"></div>
+<!-- Cycle tracker summary / launcher -->
+<div id="cycle-tracker-card" style="margin-top:14px;border:1.5px solid #b8966a33;border-radius:16px;background:var(--card);padding:16px"></div>
 <!-- Edit profile modal -->
 <div id="edit-profile-modal" style="display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(26,26,46,.5);backdrop-filter:blur(8px)" onclick="if(event.target===this)this.style.display='none'">
   <div style="background:var(--card);border-radius:20px;padding:24px;margin:0 20px;width:100%;max-width:340px;box-shadow:0 16px 48px rgba(26,26,46,.2)">
@@ -713,6 +715,18 @@ window.goPage=goPage;
     <div id="skin-quiz-body"></div>
   </div>
 </div>
+
+<!-- Cycle tracker modal -->
+<div id="cycle-tracker-modal" style="display:none;position:fixed;inset:0;z-index:600;background:var(--mist);overflow-y:auto" onclick="if(event.target===this)return;">
+  <div style="max-width:480px;margin:0 auto;padding:16px 16px 40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 16px">
+      <div style="font-size:18px;font-weight:700;color:var(--ink);font-family:'Cormorant Garamond',serif">🌙 <span id="cycle-tracker-title">Цикъл и кожа</span></div>
+      <button onclick="closeCycleTracker()" style="background:none;border:none;font-size:22px;color:var(--ink2);cursor:pointer;line-height:1;padding:4px">×</button>
+    </div>
+    <div id="cycle-tracker-body"></div>
+  </div>
+</div>
+
 
     <div id="admin-panel" style="display:none;margin-top:20px">
       <!-- ADMIN STATS ACCORDION -->
@@ -2121,6 +2135,8 @@ function goPage(name,btn){
         </div>`;
         const stc=document.getElementById('skin-test-card');
         if(stc)stc.innerHTML='';
+        const ctc=document.getElementById('cycle-tracker-card');
+        if(ctc)ctc.innerHTML='';
       } else loadProfileStats();
     }
   }catch(e){}
@@ -3951,9 +3967,260 @@ function renderSkinTestCard(){
   }
 }
 
+// ══ CYCLE TRACKER ══
+const CYCLE_PHASE_INFO = {
+  menstrual: {icon:'🩸', bg:'Менструална фаза', en:'Menstrual phase',
+    tipBg:'Кожата е по-чувствителна и по-склонна към зачервяване. Синини след инжекции зарастват по-бавно.',
+    tipEn:'Skin is more sensitive and prone to redness. Bruising after injectables heals more slowly.',
+    avoidBg:'Избягвай: филъри, ботокс, агресивни пилинги', avoidEn:'Avoid: fillers, botox, aggressive peels',
+    recIds:['clean-hydra','m8-calming','led-therapy']},
+  follicular: {icon:'🌱', bg:'Фоликуларна фаза', en:'Follicular phase',
+    tipBg:'Естроген расте, кожата е в най-добрата си форма — идеален прозорец за по-силни процедури.',
+    tipEn:'Estrogen rises, skin is at its best — ideal window for stronger treatments.',
+    avoidBg:'Добро време за: лазерна епилация, пилинги, микронийдлинг', avoidEn:'Good time for: laser hair removal, peels, microneedling',
+    recIds:['m8-reset-peel','m8-age-peel','le-alex-face','morpheus8-face']},
+  ovulation: {icon:'✨', bg:'Овулация', en:'Ovulation',
+    tipBg:'Пик на колаген и сияние. Кожата понася процедури добре.',
+    tipEn:'Peak collagen and glow. Skin tolerates treatments well.',
+    avoidBg:'Добро време за: скинбустери, леки процедури', avoidEn:'Good time for: skin boosters, light treatments',
+    recIds:['sb-profhilo','sb-rejuran','hp-hydroglow']},
+  luteal: {icon:'🌙', bg:'Лутеална фаза', en:'Luteal phase',
+    tipBg:'Прогестеронът расте, себумът се увеличава — по-склонна към обриви кожа.',
+    tipEn:'Progesterone rises, sebum increases — skin more prone to breakouts.',
+    avoidBg:'Добро време за: себорегулиращи и почистващи процедури', avoidEn:'Good time for: sebum-regulating and cleansing treatments',
+    recIds:['clean-medical','m8-clarity-facial','m8-pore']},
+};
+const SYMPTOM_TAGS = [
+  {v:'acne', bg:'Обриви', en:'Breakouts', icon:'🔴'},
+  {v:'sensitive', bg:'Чувствителност', en:'Sensitivity', icon:'🌸'},
+  {v:'dry', bg:'Сухота', en:'Dryness', icon:'🏜️'},
+  {v:'oily', bg:'Мазност', en:'Oiliness', icon:'💧'},
+  {v:'glow', bg:'Сияние', en:'Glow', icon:'✨'},
+];
+
+function _loadCycleData(){
+  try{ return JSON.parse(localStorage.getItem(_lsKey('gt_cycle'))||'null') || {periods:[], symptoms:{}, cycleLength:28}; }
+  catch(e){ return {periods:[], symptoms:{}, cycleLength:28}; }
+}
+async function _saveCycleData(data){
+  try{
+    localStorage.setItem(_lsKey('gt_cycle'), JSON.stringify(data));
+    if(window._user){ await F().setDoc(F().doc(DB(),'users',window._user.uid), {cycleData:data}, {merge:true}); }
+  }catch(e){}
+}
+function _computeCycleLength(periods){
+  if(periods.length < 2) return 28;
+  const sorted = [...periods].sort();
+  const diffs = [];
+  for(let i=1;i<sorted.length;i++){
+    const d = Math.round((new Date(sorted[i]) - new Date(sorted[i-1])) / 86400000);
+    if(d>15 && d<45) diffs.push(d);
+  }
+  if(!diffs.length) return 28;
+  return Math.round(diffs.reduce((a,b)=>a+b,0)/diffs.length);
+}
+function _phaseForDate(dateStr, cycleData){
+  if(!cycleData.periods.length) return null;
+  const sorted = [...cycleData.periods].sort();
+  const cycleLen = cycleData.cycleLength || 28;
+  const d = new Date(dateStr);
+  // Find the most recent period start on/before this date; if none, use the earliest and extrapolate backward
+  let lastStart = null;
+  for(const p of sorted){ if(new Date(p) <= d) lastStart = p; }
+  if(!lastStart){
+    // date is before any logged period — extrapolate backwards from earliest
+    lastStart = sorted[0];
+    let ls = new Date(lastStart);
+    while(ls > d){ ls.setDate(ls.getDate() - cycleLen); }
+    lastStart = ls.toISOString().slice(0,10);
+  }
+  const dayOfCycle = Math.floor((d - new Date(lastStart)) / 86400000) % cycleLen + 1;
+  const ovulationDay = Math.max(10, cycleLen - 14);
+  if(dayOfCycle <= 5) return 'menstrual';
+  if(dayOfCycle < ovulationDay - 1) return 'follicular';
+  if(dayOfCycle <= ovulationDay + 1) return 'ovulation';
+  return 'luteal';
+}
+function openCycleTracker(){
+  document.getElementById('cycle-tracker-modal').style.display='block';
+  document.body.style.overflow='hidden';
+  renderCycleTracker();
+  document.getElementById('cycle-tracker-modal').scrollTop=0;
+}
+function closeCycleTracker(){
+  document.getElementById('cycle-tracker-modal').style.display='none';
+  document.body.style.overflow='';
+}
+async function logPeriodStart(){
+  const input = document.getElementById('cycle-period-date');
+  if(!input || !input.value) return;
+  const data = _loadCycleData();
+  if(!data.periods.includes(input.value)) data.periods.push(input.value);
+  data.cycleLength = _computeCycleLength(data.periods);
+  await _saveCycleData(data);
+  showToast(window._lang==='en'?'Period logged ✓':'Записано ✓');
+  renderCycleTracker();
+}
+async function removePeriodDate(dateStr){
+  const data = _loadCycleData();
+  data.periods = data.periods.filter(p=>p!==dateStr);
+  data.cycleLength = _computeCycleLength(data.periods);
+  await _saveCycleData(data);
+  renderCycleTracker();
+}
+async function toggleSymptom(dateStr, tag){
+  const data = _loadCycleData();
+  if(!data.symptoms[dateStr]) data.symptoms[dateStr] = [];
+  const idx = data.symptoms[dateStr].indexOf(tag);
+  if(idx>=0) data.symptoms[dateStr].splice(idx,1);
+  else data.symptoms[dateStr].push(tag);
+  if(!data.symptoms[dateStr].length) delete data.symptoms[dateStr];
+  await _saveCycleData(data);
+  renderCycleTracker();
+}
+function renderCycleTracker(){
+  const isBGq = window._lang!=='en';
+  const data = _loadCycleData();
+  const body = document.getElementById('cycle-tracker-body');
+  const todayStr = new Date().toISOString().slice(0,10);
+  const sortedPeriods = [...data.periods].sort().reverse();
+  const lastPeriod = sortedPeriods[0];
+  const currentPhase = lastPeriod ? _phaseForDate(todayStr, data) : null;
+
+  let phaseHTML = '';
+  if(currentPhase){
+    const pi = CYCLE_PHASE_INFO[currentPhase];
+    const nextPeriod = new Date(lastPeriod);
+    nextPeriod.setDate(nextPeriod.getDate() + (data.cycleLength||28));
+    const daysUntilNext = daysUntil(nextPeriod);
+    const recProcs = (pi.recIds||[]).map(id=>PROCS.find(p=>p.id===id)).filter(Boolean);
+    phaseHTML = `
+      <div style="text-align:center;padding:20px 12px;border:1.5px solid #b8966a33;border-radius:16px;background:var(--card);margin-bottom:14px">
+        <div style="font-size:34px;margin-bottom:6px">${pi.icon}</div>
+        <div style="font-size:17px;font-weight:700;color:var(--ink);font-family:'Cormorant Garamond',serif;margin-bottom:6px">${isBGq?pi.bg:pi.en}</div>
+        <div style="font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:6px">${isBGq?pi.tipBg:pi.tipEn}</div>
+        <div style="font-size:11.5px;color:var(--gold);font-weight:600">${isBGq?pi.avoidBg:pi.avoidEn}</div>
+        <div style="margin-top:10px;font-size:11px;color:var(--ink2)">${daysUntilNext>=0?(isBGq?`Следващ цикъл: след ${daysUntilNext} дни`:`Next period: in ${daysUntilNext} days`):(isBGq?'Следващият цикъл вероятно е закъснял':'Next period may be overdue')}</div>
+      </div>
+      ${recProcs.length?`
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">${isBGq?'✦ Подходящо сега':'✦ Suitable right now'}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+        ${recProcs.map(p=>{const lp=procL(p);return `<div onclick="closeCycleTracker();openSheet('${p.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--roselt);border-radius:12px;background:var(--card);cursor:pointer">
+          ${p.img?`<img src="${p.img}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`:procCircleIcon(lp.name,'#b8966a',38)}
+          <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--ink1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lp.name}</div></div>
+          <div style="color:var(--gold);font-size:16px">›</div>
+        </div>`;}).join('')}
+      </div>`:''}
+    `;
+  } else {
+    phaseHTML = `<div style="text-align:center;padding:20px 12px;color:var(--ink2);font-size:12.5px;margin-bottom:14px">${isBGq?'Добави дата на последния цикъл, за да видиш фазата и препоръките.':'Add your last period date to see your phase and recommendations.'}</div>`;
+  }
+
+  // Log period date
+  const logHTML = `
+    <div style="border:1.5px solid #b8966a33;border-radius:14px;background:var(--card);padding:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">${isBGq?'Отбележи начало на цикъл':'Log period start'}</div>
+      <div style="display:flex;gap:8px">
+        <input type="date" id="cycle-period-date" max="${todayStr}" style="flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--roselt);font-size:13px;font-family:inherit;background:var(--card);color:var(--ink1)">
+        <button onclick="logPeriodStart()" style="padding:9px 16px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'Запази':'Save'}</button>
+      </div>
+      ${sortedPeriods.length?`<div style="margin-top:10px;font-size:11px;color:var(--ink2)">${isBGq?'Среден цикъл':'Average cycle'}: ${data.cycleLength} ${isBGq?'дни':'days'}</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+        ${sortedPeriods.slice(0,6).map(p=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:20px;background:var(--roselt);font-size:10.5px;color:var(--ink2)">${fmtDate(new Date(p))} <span onclick="removePeriodDate('${p}')" style="cursor:pointer;color:var(--gold);font-weight:700">×</span></span>`).join('')}
+      </div>`:''}
+    </div>`;
+
+  // Symptom logging for today
+  const todaySymptoms = data.symptoms[todayStr] || [];
+  const symptomHTML = `
+    <div style="border:1.5px solid #b8966a33;border-radius:14px;background:var(--card);padding:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">${isBGq?'Как е кожата ти днес?':"How's your skin today?"}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${SYMPTOM_TAGS.map(t=>{
+          const active = todaySymptoms.includes(t.v);
+          return `<button onclick="toggleSymptom('${todayStr}','${t.v}')" style="padding:7px 12px;border-radius:20px;border:1.5px solid ${active?'var(--gold)':'var(--roselt)'};background:${active?'rgba(184,150,106,.12)':'var(--card)'};color:${active?'var(--gold)':'var(--ink2)'};font-size:11.5px;font-weight:${active?'700':'400'};cursor:pointer;font-family:inherit">${t.icon} ${isBGq?t.bg:t.en}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  // Skin patterns from diary cross-reference
+  let patternsHTML = '';
+  const diaryDocs = (window._cache && window._cache.diary) || [];
+  if(data.periods.length && diaryDocs.length){
+    const phaseStats = {menstrual:[], follicular:[], ovulation:[], luteal:[]};
+    diaryDocs.forEach(d=>{
+      const doc = d.data ? d.data() : d;
+      const dateVal = doc.createdAt && doc.createdAt.toDate ? doc.createdAt.toDate() : (doc.date ? new Date(doc.date) : null);
+      if(!dateVal) return;
+      const dateStr2 = dateVal.toISOString().slice(0,10);
+      const phase = _phaseForDate(dateStr2, data);
+      if(phase && doc.rating) phaseStats[phase].push(Number(doc.rating));
+    });
+    const hasData = Object.values(phaseStats).some(a=>a.length);
+    if(hasData){
+      patternsHTML = `
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">${isBGq?'📊 Кожата ти по фази (от дневника)':'📊 Your skin by phase (from diary)'}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px">
+        ${Object.keys(phaseStats).map(ph=>{
+          const arr = phaseStats[ph];
+          if(!arr.length) return '';
+          const avg = (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1);
+          const pi = CYCLE_PHASE_INFO[ph];
+          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--roselt);border-radius:10px;background:var(--card)">
+            <div style="font-size:18px">${pi.icon}</div>
+            <div style="flex:1;font-size:12px;color:var(--ink1)">${isBGq?pi.bg:pi.en}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gold)">${avg}★ <span style="font-weight:400;color:var(--ink2);font-size:10.5px">(${arr.length})</span></div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+  }
+
+  body.innerHTML = `
+    <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${isBGq?'Общ ориентир, не медицински съвет — при въпроси се консултирай с лекар.':'General guidance, not medical advice — consult a doctor with questions.'}</div>
+    ${logHTML}
+    ${phaseHTML}
+    ${symptomHTML}
+    ${patternsHTML}
+  `;
+  renderCycleTrackerCard();
+}
+function renderCycleTrackerCard(){
+  const el = document.getElementById('cycle-tracker-card');
+  if(!el) return;
+  const isBGq = window._lang!=='en';
+  const data = _loadCycleData();
+  const sortedPeriods = [...data.periods].sort().reverse();
+  if(sortedPeriods.length){
+    const todayStr = new Date().toISOString().slice(0,10);
+    const phase = _phaseForDate(todayStr, data);
+    const pi = phase ? CYCLE_PHASE_INFO[phase] : null;
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:28px">${pi?pi.icon:'🌙'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px">${isBGq?'Текуща фаза':'Current phase'}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink)">${pi?(isBGq?pi.bg:pi.en):'—'}</div>
+        </div>
+      </div>
+      <button onclick="openCycleTracker()" style="width:100%;margin-top:12px;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'🌙 Виж календара':'🌙 View calendar'}</button>`;
+  } else {
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:28px">🌙</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;color:var(--ink)">${isBGq?'Цикъл и кожа':'Cycle & skin'}</div>
+          <div style="font-size:11.5px;color:var(--ink2)">${isBGq?'Проследявай цикъла и връзката му с кожата':'Track your cycle and its link to your skin'}</div>
+        </div>
+      </div>
+      <button onclick="openCycleTracker()" style="width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${isBGq?'🌙 Настрой календара':'🌙 Set up calendar'}</button>`;
+  }
+}
+
 function loadProfileStats(){
   if(!window._user) return;
   renderSkinTestCard();
+  renderCycleTrackerCard();
   // Always hide admin panel first, show only if admin
   const ap = document.getElementById('admin-panel');
   if(ap) ap.style.display = window._isAdmin ? 'block' : 'none';
