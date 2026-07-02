@@ -5006,7 +5006,7 @@ function updatePushToggleUI(){
     txt.textContent='Известията са блокирани от браузъра. Разреши ги от настройките на телефона, за да продължиш.';
   }else if(status==='unsupported'){
     btn.textContent='Недостъпно';btn.style.background='var(--card)';btn.style.color='var(--ink2)';btn.disabled=true;btn.style.cursor='default';btn.style.borderColor='var(--roselt)';
-    txt.innerHTML='Push известията не работят в обикновен браузър таб. Добави приложението на началния екран (Share → Add to Home Screen) и го отвори от там.';
+    txt.innerHTML='Push известията не работят в браузър таб. Добави приложението на десктоп (Share → Add to Home Screen).';
   }else{
     btn.textContent='Включи';btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';btn.style.background='var(--gold)';btn.style.borderColor='var(--gold)';btn.style.color='#fff';
     txt.textContent='Позволи на браузъра да изпраща известия, за да получаваш напомняния навреме. На iPhone добави приложението на началния екран, за да проработят.';
